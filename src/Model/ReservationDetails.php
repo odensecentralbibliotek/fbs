@@ -6,7 +6,7 @@ class ReservationDetails
 {
 
     /**
-     * @var string DBC OpenSearch: //searchresult/collection/object/identifier
+     * @var string The FAUST number
      * @required
      */
     public $recordId = null;
@@ -54,6 +54,12 @@ class ReservationDetails
     public $periodical = null;
 
     /**
+     * @var ILLBibliographicRecord Additional bibliographic information for
+     * inter-library loans
+     */
+    public $ilBibliographicRecord = null;
+
+    /**
      * @var string 
      * @required
      */
@@ -63,6 +69,12 @@ class ReservationDetails
      * @var integer The number in the reservation queue.
      */
     public $numberInQueue = null;
+
+    /**
+     * @var string The reservation number. Will be present if the reservation is ready
+     * for pickup (the state is 'readyForPickup')
+     */
+    public $pickupNumber = null;
 
 
 }
