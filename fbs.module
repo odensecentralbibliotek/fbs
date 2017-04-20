@@ -184,7 +184,7 @@ function fbs_settings_form() {
   // to 180 days.
   $periods = fbs_interest_periods();
   $default = variable_get('fbs_default_interest_period', 180);
-  $form['fbs'] += ding_reservation_interest_period_selector('fbs_default_interest_period', $default, $periods);
+  $form['fbs'] += ding_reservation_interest_period_selector('fbs_default_interest_period','fbs_default_interest_period', $default, $periods);
 
   $form['fbs']['fbs_enable_reservation_deletion'] = array(
     '#type' => 'checkbox',
@@ -271,7 +271,8 @@ function fbs_profile2_presave($entity) {
     $update->patron = $patron_settings;
     $res = fbs_service()->Patron->update(fbs_service()->agencyId, $patron['patronId'], $update);
     $result['creds'] = _fbs_patron_info($res->patron);
-    ding_user_save_creds($result);
+    global $user;
+    ding_user_save_creds($result,$user);
   }
 }
 
@@ -495,3 +496,4 @@ function _fbs_wayf_login($name, $value = NULL) {
 
   return NULL;
 }
+
