@@ -46,7 +46,16 @@ function fbs_debt_list($account) {
       // If there's only one material, use its title as display_name;
       if (count($record_ids) == 1) {
         $entity = ding_entity_load(ding_provider_build_entity_id(reset($record_ids)));
-        $data['display_name'] = $entity->getTitle();
+        //$entity = ting_object_load(ding_provider_build_entity_id(reset($record_ids)));
+        if($entity != null)
+        {
+            $data['display_name'] = $entity->getTitle();
+        }
+        else
+        {
+            //for when testing and the material is not in our datawell.
+            $data['material_number'] = implode(', ', $material_ids);
+        }
       }
       elseif (count($record_ids) > 1) {
         $data['display_name'] = t('Multiple materials');
