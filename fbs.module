@@ -184,7 +184,7 @@ function fbs_settings_form() {
   // to 180 days.
   $periods = fbs_interest_periods();
   $default = variable_get('fbs_default_interest_period', 180);
-  $form['fbs'] += ding_reservation_interest_period_selector('create','interest_period', variable_get('fbs_default_interest_period', 180), fbs_interest_periods());
+  $form['fbs'] += ding_reservation_interest_period_selector('create','fbs_default_interest_period', variable_get('fbs_default_interest_period', 180), fbs_interest_periods());
 
   $form['fbs']['fbs_enable_reservation_deletion'] = array(
     '#type' => 'checkbox',
