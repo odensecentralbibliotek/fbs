@@ -26,13 +26,13 @@ function fbs_reservation_list($account, $requested_type = NULL) {
   }
 
   $result = array(
-    DING_RESERVATION_READY => array(),
-    DING_RESERVATION_NOT_READY => array(),
-    DING_RESERVATION_INTERLIBRARY_LOANS => array(),
+    'DING_RESERVATION_READY' => array(),
+    'DING_RESERVATION_NOT_READY' => array(),
+    'DING_RESERVATION_INTERLIBRARY_LOANS' => array(),
   );
   foreach ($res as $reservation) {
-    $type = $reservation->state == 'readyForPickup' ? DING_RESERVATION_READY : DING_RESERVATION_NOT_READY;
-    $type = $reservation->state == 'interLibraryReservation' ? DING_RESERVATION_INTERLIBRARY_LOANS : $type;
+    $type = $reservation->state == 'readyForPickup' ? 'DING_RESERVATION_READY' : 'DING_RESERVATION_NOT_READY';
+    $type = $reservation->state == 'interLibraryReservation' ? 'DING_RESERVATION_INTERLIBRARY_LOANS' : $type;
     $ding_reservation = array(
       'ding_entity_id' => ding_provider_build_entity_id($reservation->recordId),
       'id' => $reservation->reservationId,
@@ -43,12 +43,12 @@ function fbs_reservation_list($account, $requested_type = NULL) {
       'reservation_type' => $type,
     );
 
-    if ($type === DING_RESERVATION_READY) {
+    if ($type === 'DING_RESERVATION_READY') {
       $ding_reservation['pickup_date'] = $reservation->pickupDeadline;
       $ding_reservation['pickup_order_id'] = $reservation->pickupNumber;
       $ding_reservation['order_arrived'] = TRUE;
     }
-    elseif ($type === DING_RESERVATION_NOT_READY || $type === DING_RESERVATION_INTERLIBRARY_LOANS) {
+    elseif ($type === 'DING_RESERVATION_NOT_READY' || $type === 'DING_RESERVATION_INTERLIBRARY_LOANS') {
       if (!empty($reservation->numberInQueue)) {
         $ding_reservation['queue_number'] = $reservation->numberInQueue;
       }
@@ -299,8 +299,8 @@ function fbs_reservation_options($account, $default_branch = NULL) {
   }
 
   $form = array();
-  $form += ding_reservation_default_options_branch('fbs_preferred_branch', $preferred_branch, fbs_branches());
-  $form += ding_reservation_interest_period_selector('interest_period', variable_get('fbs_default_interest_period', 180), fbs_interest_periods());
+  $form += ding_reservation_default_options_branch('create','preferred_branch', $preferred_branch, fbs_branches());
+  $form += ding_reservation_interest_period_selector('create','interest_period', variable_get('fbs_default_interest_period', 180), fbs_interest_periods());
 
   return $form;
 }
@@ -313,9 +313,15 @@ function fbs_reservation_options($account, $default_branch = NULL) {
  * @param array $values
  *   Form values.
  */
-function fbs_reservation_options_submit($account, $values) {
-  fbs_update_preferred_branch($account, $values['fbs_preferred_branch']);
-}
+function fbs_reservation_options_submit($type, $account, $reservables, $values) {		
+    /*		
+     * Get the preffered branch for the user profile ?		
+     */		
+  $profile = ding_user_provider_profile($account);		
+  $field_language = field_language('profile2', $profile);		
+  $profile_branch = $profile->field_fbs_preferred_branch[$field_language['field_fbs_preferred_branch']][0]['value'];		
+  fbs_update_preferred_branch($account, $profile_branch);		
+ }
 
 /**
  * Implements provider reservation, default_interst_period.

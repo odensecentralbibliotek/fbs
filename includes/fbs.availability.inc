@@ -61,7 +61,7 @@ function fbs_availability_holdings($provider_ids) {
       'total_count' => 0,
       // We don't know about this one.
       'is_internet' => FALSE,
-      'reserved_count' => $item->reservations,
+      'reserved_count' => isset($item->reservations) ? $item->reservations: null,
       'is_periodical' => FALSE,
     );
 
