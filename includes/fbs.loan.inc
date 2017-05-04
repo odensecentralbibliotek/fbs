@@ -33,6 +33,7 @@ function fbs_loan_list($account) {
       'expiry' => $loan->loanDetails->dueDate,
       'renewable' => $loan->isRenewable,
       'materials_number' => $loan->loanDetails->materialItemNumber,
+      'renewalStatusList' => $loan->renewalStatusList,
     );
 
     // If this is a periodical, add in issue data.

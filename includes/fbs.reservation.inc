@@ -185,7 +185,7 @@ function fbs_reservation_update($account, $reservation_ids, $options) {
     $reservation = new FBS\Model\UpdateReservation();
     $reservation->reservationId = $reservation_id;
     $reservation->expiryDate = date('Y-m-d', REQUEST_TIME + ($options['interest_period'] * 24 * 60 * 60));
-    $reservation->pickupBranch = $options['fbs_preferred_branch'];
+    $reservation->pickupBranch = isset($options['fbs_preferred_branch']) ? $options['fbs_preferred_branch'] : $options['preferred_branch'];
     $batch->reservations[] = $reservation;
   }
 
