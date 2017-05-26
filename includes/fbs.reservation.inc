@@ -157,6 +157,7 @@ function fbs_reservation_create($account, $record_id, $options) {
       case 'material_lost':
       case 'material_not_found':
       case 'material_part_of_collection':
+      case 'no_reservable_materials':
         throw new DingProviderReservationNotAvailable();
 
       // Success shouldn't happen.

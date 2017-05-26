@@ -108,7 +108,7 @@ class ExternalPatronApi extends SwaggerApi
     {
         $request = $this->newRequest("POST", "/external/v1/{agencyid}/patrons/preauthenticated");
         $request->addParameter("path", "agencyid", $agencyid);
-        $request->addParameter("body", "cprNumber", $cprNumber);
+        $request->addParameter("body", "", (int)$cprNumber);
 
         $request->defineResponse(200, "", '\\FBS\\Model\\AuthenticatedPatron');
         $request->defineResponse("400", 'bad request', '\\FBS\\Model\\RestException');
