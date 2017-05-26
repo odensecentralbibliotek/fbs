@@ -192,7 +192,51 @@ function fbs_settings_form() {
     '#default_value' => variable_get('fbs_enable_reservation_deletion', FALSE),
     '#description' => t('Allow users to delete their reservations as well as ready for pickup ones.'),
   );
-
+  $form['fbs']['fbs_search_departments'] = array(
+        '#type' => 'textarea',
+        '#default_value' => variable_get('fbs_search_departments', ''),
+        '#title' => t('departments you can search in'),
+        '#attributes' => array(
+            'placeholder' => t('eksempel: voksen|ocv med 1 pr. linje'),
+        ),
+        '#description' => t(''),
+   );
+   $form['fbs']['fbs_nonreserveable_collections'] = array(
+        '#type' => 'textarea',
+        '#default_value' => variable_get('fbs_nonreserveable_collections', ''),
+        '#title' => t('nonreserveable collectionms'),
+        '#attributes' => array(
+            'placeholder' => t(''),
+        ),
+        '#description' => t(''),
+   );
+    $form['fbs']['fbs_nonhome_locations'] = array(
+        '#type' => 'textarea',
+        '#default_value' => variable_get('fbs_nonhome_locations', ''),
+        '#title' => t('nonhome locations'),
+        '#attributes' => array(
+            'placeholder' => t(''),
+        ),
+        '#description' => t(''),
+   );
+  $form['fbs']['fbs_nonhome_departments'] = array(
+        '#type' => 'textarea',
+        '#default_value' => variable_get('fbs_nonhome_departments', ''),
+        '#title' => t('nonhome departments'),
+        '#attributes' => array(
+            'placeholder' => t(''),
+        ),
+        '#description' => t(''),
+   );
+   $form['fbs']['fbs_search_departments'] = array(
+        '#type' => 'textarea',
+        '#default_value' => variable_get('fbs_search_departments', ''),
+        '#title' => t('departments for advanced search field.'),
+        '#attributes' => array(
+            'placeholder' => t('eksempel: voksen|ocv med 1 pr. linje'),
+        ),
+        '#description' => t(''),
+   );
   return system_settings_form($form);
 }
 
