@@ -74,7 +74,10 @@ function fbs_availability_holdings($provider_ids) {
         'reference_count' => 0,
         'placement' => array(),
       );
-
+      //check if it is in a non home location
+      
+      //check if it is in a non home department
+      
       // Add in placement.
       foreach ($placement_parts as $part) {
         if (!empty($item_holding->{$part}->title)) {
