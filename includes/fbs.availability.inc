@@ -67,6 +67,7 @@ function fbs_availability_holdings($provider_ids) {
 
     $placement_parts = array('branch', 'department', 'location', 'sublocation');
     foreach ($item->holdings as $item_holding) {
+      
       $result_holding = array(
         'available_count' => 0,
         'total_count' => 0,
@@ -74,15 +75,27 @@ function fbs_availability_holdings($provider_ids) {
         'reference_count' => 0,
         'placement' => array(),
       );
-      //check if it is in a non home location
-      
-      //check if it is in a non home department
-      
+   
       // Add in placement.
       foreach ($placement_parts as $part) {
         if (!empty($item_holding->{$part}->title)) {
           $result_holding['placement'][] = $item_holding->{$part}->title;
         }
+      }
+      //check if it is in a non home location
+      $non_home_locations = explode(PHP_EOL,variable_get('fbs_nonhome_locations', ''));
+      foreach ($result_holding['placement']as $part) {
+          if(in_array($part,$non_home_locations))
+          {
+              //$result[$item->recordId]['total_count'] = 0;
+              $item_holding->materials[0]->available = 0;
+          }
+      }
+      //check if it is in a non home department
+      $non_home_departments = explode(PHP_EOL,variable_get('fbs_nonhome_departments', ''));
+      if(isset($item_holding->department) && in_array($item_holding->department->title,$non_home_departments))
+      {
+        $item_holding->materials[0]->available = false;
       }
       $placement_string = implode(' > ', $result_holding['placement']);
       // Count available materials.
@@ -118,7 +131,7 @@ function fbs_availability_holdings($provider_ids) {
           }
         }
       }
-
+ 
       $result[$item->recordId]['holdings'][] = $result_holding;
     }
 
