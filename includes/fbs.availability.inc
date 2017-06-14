@@ -114,15 +114,18 @@ function fbs_availability_holdings($provider_ids) {
       if ($suffix_type == 'simple') {
         // Load entity by the provider id.
         $entity = ding_entity_load($entity_id);
+        /* sometimes it fails to load the entity ? */
+        if(isset($entity) && is_object($entity))
+        {
+            // Get DK5 classification.
+            if ($classification = $entity->getClassification()) {
+              $result_holding['placement'][] = $classification;
+            }
 
-        // Get DK5 classification.
-        if ($classification = $entity->getClassification()) {
-          $result_holding['placement'][] = $classification;
-        }
-
-        // Get inverted author.
-        if ($creator = $entity->getInvertedCreators()) {
-          $result_holding['placement'][] = $creator[0];
+            // Get inverted author.
+            if ($creator = $entity->getInvertedCreators()) {
+              $result_holding['placement'][] = $creator[0];
+            }
         }
       }
       elseif ($suffix_type == 'shelf_mark') {
