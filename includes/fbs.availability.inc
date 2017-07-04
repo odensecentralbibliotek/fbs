@@ -87,14 +87,21 @@ function fbs_availability_holdings($provider_ids) {
           $result_holding['placement'][] = $item_holding->{$part}->title;
         }
       }
-            //check if it is in a non home location
+      //check if it is in a non home location
       $non_home_locations = explode(PHP_EOL,variable_get('fbs_nonhome_locations', ''));
       foreach ($result_holding['placement']as $part) {
-          if(in_array($part,$non_home_locations))
+          foreach($non_home_locations as $non_home)
           {
-              //$result[$item->recordId]['total_count'] = 0;
-              $item_holding->materials[0]->available = 0;
+              if(!strcmp(trim($part),trim($non_home)))
+              {
+                for($i = 0; $i < sizeof($item_holding->materials);$i++)
+                {
+                    $item_holding->materials[$i]->available = FALSE;
+                }
+                break;
+              }
           }
+          
       }
       //check if it is in a non home department
       $non_home_departments = explode(PHP_EOL,variable_get('fbs_nonhome_departments', ''));
@@ -241,7 +248,6 @@ function fbs_availability_holdings($provider_ids) {
           }
         }
       }
-
       $result[$item->recordId]['holdings'][] = $result_holding;
     }
 
