@@ -118,7 +118,7 @@ function fbs_reservation_create($account, $record_id, $options) {
   }
 
   $reservation->expiryDate = date('Y-m-d', REQUEST_TIME + ($options['interest_period'] * 24 * 60 * 60));
-  $reservation->pickupBranch = $options['fbs_preferred_branch'];
+  $reservation->pickupBranch = isset($options['fbs_preferred_branch']) ?  $options['fbs_preferred_branch'] :  $options['preferred_branch'];
   $batch->reservations[] = $reservation;
 
   /** @var \FBS\Model\ReservationResponse $response */
