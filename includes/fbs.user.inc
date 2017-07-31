@@ -128,7 +128,7 @@ function fbs_user_update_pincode($account, $new_pincode) {
   $update = new FBS\Model\UpdatePatronRequest();
   $pincode_change = new FBS\Model\PincodeChange();
   $pincode_change->pincode = $new_pincode;
-  $pincode_change->libraryCardNumber = $patron_info['library_card_number'];
+  $pincode_change->libraryCardNumber = isset($patron_info['library_card_number']) ? $patron_info['library_card_number'] : null;
   $update->pincodeChange = $pincode_change;
 
   $res = NULL;
