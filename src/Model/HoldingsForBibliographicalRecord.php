@@ -26,6 +26,11 @@ class HoldingsForBibliographicalRecord
      */
     public $holdings = null;
 
-
+    /**
+     * @var integer Total number of current active reservations for the bibliographical
+     * record
+     * @required
+     */
+    public $reservations = null;
 }
 
