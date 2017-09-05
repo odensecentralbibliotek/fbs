@@ -73,7 +73,9 @@ function fbs_reservation_list($account, $requested_type = NULL) {
     if (!empty($reservation->ilBibliographicRecord)) {
       $ding_reservation['display_name'] = $reservation->ilBibliographicRecord->title;
     }
-
+    if (!empty($reservation->loanDetails->ilBibliographicRecord)) {
+      $ding_reservation['display_name'] = $loan->reservationDetails->ilBibliographicRecord->title;
+    }
     $result[$type][$ding_reservation['id']] = new DingProviderReservation($ding_reservation['id'], $ding_reservation);
   }
 

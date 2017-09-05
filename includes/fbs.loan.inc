@@ -55,6 +55,9 @@ function fbs_loan_list($account) {
     if (!empty($loan->ilBibliographicRecord)) {
       $loan_data['display_name'] = $loan->ilBibliographicRecord->title;
     }
+    if (!empty($loan->loanDetails->ilBibliographicRecord)) {
+      $loan_data['display_name'] = $loan->loanDetails->ilBibliographicRecord->title;
+    }
 
     $result[$id] = new DingProviderLoan($id, $loan_data);
   }
