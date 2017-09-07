@@ -237,6 +237,15 @@ function fbs_settings_form() {
         ),
         '#description' => t(''),
    );
+   $form['fbs']['fbs_exclude_branches'] = array(
+        '#type' => 'textarea',
+        '#default_value' => variable_get('fbs_exclude_branches', ''),
+        '#title' => t('exclude library branches'),
+        '#attributes' => array(
+            'placeholder' => t('eksempel: DK-746103 med 1 pr. linje'),
+        ),
+        '#description' => t(''),
+   );
   return system_settings_form($form);
 }
 
@@ -280,7 +289,7 @@ function fbs_profile2_presave($entity) {
   $current = array(
     'phoneNumber' => $wrapper->field_fbs_phone->value(),
     'emailAddress' => $wrapper->field_fbs_mail->value(),
-    'receiveSms' => (bool) $wrapper->field_fbs_phone_notification->value(),
+    'receiveSms' => (bool) isset($wrapper->field_fbs_phone_notification) ? $wrapper->field_fbs_phone_notification->value() : false,
     'receiveEmail' => (bool) $wrapper->field_fbs_mail_notification->value(),
     'preferredPickupBranch' => $wrapper->field_fbs_preferred_branch->value(),
   );
@@ -318,6 +327,7 @@ function fbs_profile2_presave($entity) {
     global $user;
     ding_user_save_creds($result,$user);
   }
+  
 }
 
 /**
@@ -356,10 +366,24 @@ function fbs_branches() {
   $branches = &drupal_static(__FUNCTION__, NULL);
   if (is_null($branches)) {
     $res = fbs_service()->Placement->getBranches(fbs_service()->agencyId);
+    $exclude_branches = explode(PHP_EOL,variable_get('fbs_exclude_branches', ''));
     foreach ($res as $branch) {
-      $branches[$branch->branchId] = $branch->title;
+        $exclude = false;
+        foreach($exclude_branches as $ex_branch_id)
+        {
+            $tmp = $branch->branchId;
+            if(strcmp(trim($tmp),trim($ex_branch_id)) == 0)
+            {
+               $exclude = true;
+               break;
+            }
+        }
+        if(!$exclude){
+            $branches[$branch->branchId] = $branch->title;
+        }
+      
     }
-
+    
     asort($branches);
   }
   return $branches;
