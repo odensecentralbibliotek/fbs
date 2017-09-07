@@ -347,10 +347,10 @@ function fbs_update_preferred_branch($account, $branch_id) {
   }
 
   $profile = ding_user_provider_profile($account);
-  $wrapper = entity_metadata_wrapper('profile2', $profile);
+  //$wrapper = entity_metadata_wrapper('profile2', $profile);
 
-  if (!$wrapper->field_fbs_preferred_branch->value()) {
-    $wrapper->field_fbs_preferred_branch->set($branch_id);
+  if ($profile->field_fbs_preferred_branch['und'][0]['value'] == "") {
+    $profile->field_fbs_preferred_branch['und'][0]['value'] = $branch_id;
 
     $profile->save();
   }

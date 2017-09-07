@@ -323,7 +323,11 @@ function fbs_reservation_options_submit($type, $account, $reservables, $values) 
      */		
   $profile = ding_user_provider_profile($account);		
   $field_language = field_language('profile2', $profile);		
-  $profile_branch = $profile->field_fbs_preferred_branch[$field_language['field_fbs_preferred_branch']][0]['value'];		
+  $profile_branch = $profile->field_fbs_preferred_branch[$field_language['field_fbs_preferred_branch']][0]['value'];
+  if($profile_branch == "")
+  {
+      $profile_branch = $values['preferred_branch'];
+  }
   fbs_update_preferred_branch($account, $profile_branch);		
  }
 
