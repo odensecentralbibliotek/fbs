@@ -71,7 +71,7 @@ class ExternalPatronApi extends SwaggerApi
      */
     public function authenticate($agencyid, Model\AuthenticationRequest $authenticationRequest)
     {
-        $request = $this->newRequest("POST", "/external/v1/{agencyid}/patrons/authenticate");
+        $request = $this->newRequest("POST", "/external/v2/{agencyid}/patrons/authenticate");
         $request->addParameter("path", "agencyid", $agencyid);
         $request->addParameter("body", "authenticationRequest", $authenticationRequest);
 
