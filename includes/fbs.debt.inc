@@ -14,23 +14,28 @@
  * @return array
  *   Debt information.
  */
-function fbs_debt_list($account) {
+function fbs_debt_list($account,$include_nonpayable = true) {
   $result = array();
   $res = array();
 
   try {
-    $res = fbs_service()->Payment->getFees(fbs_service()->agencyId, fbs_patron_id($account), FALSE, FALSE);
+    $res = fbs_service()->Payment->getFees(fbs_service()->agencyId, fbs_patron_id($account), FALSE, $include_nonpayable);
   }
   catch (Exception $e) {
     watchdog_exception('fbs', $e);
   }
 
   foreach ($res as $fee) {
+     if($fee->amount <= 0)
+     {
+         continue;
+     }
     $id = $fee->feeId;
 
     $data = array(
       'date' => $fee->creationDate,
       'display_name' => $fee->reasonMessage,
+      'payableByClient' => $fee->payableByClient,
       // FBS only provides the amount left to be paid on each fee, so this
       // will only reflect that.
       'amount' => $fee->amount,
@@ -59,10 +64,10 @@ function fbs_debt_list($account) {
       }
       $data['material_number'] = implode(', ', $material_ids);
     }
-
+    
     $result[$id] = new DingProviderDebt($id, $data);
   }
-
+  
   return $result;
 }
 
