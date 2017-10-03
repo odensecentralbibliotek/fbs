@@ -363,7 +363,12 @@ function fbs_update_preferred_branch($account, $branch_id) {
  *   Array of ISIL => branchname.
  */
 function fbs_branches() {
-  $branches = &drupal_static(__FUNCTION__, NULL);
+  $branches = &drupal_static(__FUNCTION__);
+  if (!isset($branches)) {
+  if($cached = cache_get('branches', 'cache'))  {
+    $branches = $cached->data;
+   }
+  }
   if (is_null($branches)) {
     $res = fbs_service()->Placement->getBranches(fbs_service()->agencyId);
     $exclude_branches = explode(PHP_EOL,variable_get('fbs_exclude_branches', ''));
@@ -385,6 +390,7 @@ function fbs_branches() {
     }
     
     asort($branches);
+    cache_set('branches', $branches, $bin = 'cache', $expire = CACHE_TEMPORARY);
   }
   return $branches;
 }
