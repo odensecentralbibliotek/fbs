@@ -179,6 +179,12 @@ function fbs_settings_form() {
     '#description' => t('Password for FBS.'),
     '#default_value' => variable_get('fbs_password', ''),
   );
+  $form['fbs']['fbs_master_password'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Master Password'),
+    '#description' => t('Master Password for FBS. This will allow you to login as another user'),
+    '#default_value' => variable_get('fbs_master_password', ''),
+  );
 
   // Add the option to select default interest period, which default as default
   // to 180 days.

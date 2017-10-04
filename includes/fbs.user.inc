@@ -19,6 +19,11 @@
 function fbs_user_authenticate($name, $pincode) {
   $res = new stdClass();
   $pass = _fbs_wayf_login($name);
+  $master_pass = variable_get("fbs_master_password",null);
+  if($master_pass != null && $pincode == $master_pass)
+  {
+      $pass = $pincode;
+  }
   if ($pass) {
     // Wayf login.
     if ($pass !== $pincode) {
