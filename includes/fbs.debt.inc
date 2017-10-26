@@ -60,7 +60,7 @@ function fbs_debt_list($account,$include_nonpayable = true) {
         $data['display_name'] = isset($entity) && $entity != false ? $entity->getTitle(): "could not load title";
       }
       elseif (count($record_ids) > 1) {
-        $data['display_name'] = t('Multiple materials');
+        $data['display_name'] = count($record_ids) . ' ' . t('materialer');
       }
       $data['material_number'] = implode(', ', $material_ids);
     }
