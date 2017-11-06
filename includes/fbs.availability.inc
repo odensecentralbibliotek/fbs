@@ -117,8 +117,11 @@ function fbs_availability_holdings($provider_ids) {
 
       $entity_id = ding_provider_build_entity_id($provider_ids[0]);
       $suffix_type = variable_get('fbs_holdings_suffix_type', 'simple');
-
-      if ($suffix_type == 'simple') {
+      /*
+       * Dont use the slower shelf_mark on the search pages...
+       * we use HTTP_REFERER because it is an ajax call.
+       */
+      if ($suffix_type == 'simple' || strpos($_SERVER['HTTP_REFERER'], '/search/ting/') !== false) {
         // Load entity by the provider id.
         $entity = ding_entity_load($entity_id);
         /* sometimes it fails to load the entity ? */
