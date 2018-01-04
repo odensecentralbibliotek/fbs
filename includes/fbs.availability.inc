@@ -161,7 +161,14 @@ function fbs_availability_holdings($provider_ids) {
         // to be sure.
         else if ($field652m != 'sk' && $field652o != 'sk') {
           // DK5 classification.
-          $suffix .= $field652m;
+            if($field652m != null)
+            {
+                $suffix .= $field652m;
+            }
+            else
+            {
+                $suffix .= $field652o;
+            }
 
           // Additonal descriptors from the DK5 classification.
           if ($field652b = fbs_get_marc_field($entity, '652', 'b')) {
