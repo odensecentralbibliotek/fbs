@@ -187,6 +187,10 @@ function fbs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
           '#date_format' => 'd-m-Y',
           '#date_label_position' => 'invisible',
           '#default_value' => $default_value,
+          '#date_year_range' => '-0:+3',
+          '#datepicker_options' => array(
+            'minDate' => '0' // not more than given date
+          )
         );
       }
 
