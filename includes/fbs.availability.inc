@@ -144,6 +144,7 @@ function fbs_availability_holdings($provider_ids) {
         $suffix = '';
         $field652m = fbs_get_marc_field($entity, '652', 'm');
         $field652o = fbs_get_marc_field($entity, '652', 'o');
+        $field652p = fbs_get_marc_field($entity, '652', 'p');
 
         // Special handling for music:
         // Field 039.a and 039.b is used for data about music shelf_mark, so we
@@ -169,15 +170,17 @@ function fbs_availability_holdings($provider_ids) {
             {
                 $suffix .= $field652o;
             }
-
-          // Additonal descriptors from the DK5 classification.
-          if ($field652b = fbs_get_marc_field($entity, '652', 'b')) {
-            $suffix .= ' ' . $field652b;
-          }
-          else if ($field652a = fbs_get_marc_field($entity, '652', 'a')) {
-            $suffix .= ' ' . $field652a;
-            if ($field652h = fbs_get_marc_field($entity, '652', 'h')) {
-              $suffix .= ', ' . $field652h;
+            if($field652m == "99.4"){
+                
+            // Additonal descriptors from the DK5 classification.
+            if ($field652b = fbs_get_marc_field($entity, '652', 'b')) {
+              $suffix .= ' ' . $field652b;
+            }
+            else if ($field652a = fbs_get_marc_field($entity, '652', 'a')) {
+              $suffix .= ' ' . $field652a;
+              if ($field652h = fbs_get_marc_field($entity, '652', 'h')) {
+                $suffix .= ', ' . $field652h;
+              }
             }
           }
         }
@@ -195,7 +198,13 @@ function fbs_availability_holdings($provider_ids) {
           // If we found a shelf_mark and there's already something in suffix,
           // remember to add a seperator.
           if ($suffix) {
+              if($field652m != "99.4" && $field652p != "99.4"){
             $suffix .= ' > ';
+              }
+              else
+              {
+                  $suffix .= " ";
+              }
           }
 
           $words = explode(' ', $shelf_mark);
@@ -211,7 +220,7 @@ function fbs_availability_holdings($provider_ids) {
 
           // If no special mark; use the first word.
           if (!$shelf_mark) {
-            $shelf_mark = array_values($words)[0];
+            $shelf_mark = implode(' ',$words);
           }
 
           // A neat little trick for mb_ucfirst:
