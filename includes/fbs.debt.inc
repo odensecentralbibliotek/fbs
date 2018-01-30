@@ -43,7 +43,7 @@ function fbs_debt_list($account,$include_nonpayable = true) {
       // amount isn't available.
       'amount_paid' => 0,
       'invoice_number' => NULL,
-      'type' => $fee->reasonMessage,
+      'type' => $fee->type,
     );
 
     if (!empty($fee->materials)) {
