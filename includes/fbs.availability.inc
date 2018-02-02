@@ -43,6 +43,11 @@ function fbs_availability_items($provider_ids) {
 function fbs_availability_holdings($provider_ids) {
   $holdings = array();
 
+  /*
+   * Convert to katalog posts.
+   * sometimes the library staff will disagress with national placements.
+   */
+  
   try {
     $holdings = fbs_service()->Catalog->getHoldings(fbs_service()->agencyId, $provider_ids);
   }
@@ -115,7 +120,7 @@ function fbs_availability_holdings($provider_ids) {
         $result_holding['placement'][] = $material_description[0]->materialGroupName;
       }
 
-      $entity_id = ding_provider_build_entity_id($provider_ids[0]);
+      $entity_id = variable_get('ting_agency', FALSE) . "-katalog:".$provider_ids[0];
       $suffix_type = variable_get('fbs_holdings_suffix_type', 'simple');
       /*
        * Dont use the slower shelf_mark on the search pages...
