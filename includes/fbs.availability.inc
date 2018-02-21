@@ -175,13 +175,13 @@ function fbs_availability_holdings($provider_ids) {
             {
                 $suffix .= $field652o;
             }
-            if($field652m == "99.4"){
-                
-            // Additonal descriptors from the DK5 classification.
+             // Additonal descriptors from the DK5 classification.
             if ($field652b = fbs_get_marc_field($entity, '652', 'b')) {
               $suffix .= ' ' . $field652b;
             }
-            else if ($field652a = fbs_get_marc_field($entity, '652', 'a')) {
+            if($field652m == "99.4"){
+                
+            if ($field652a = fbs_get_marc_field($entity, '652', 'a')) {
               $suffix .= ' ' . $field652a;
               if ($field652h = fbs_get_marc_field($entity, '652', 'h')) {
                 $suffix .= ', ' . $field652h;
