@@ -114,6 +114,17 @@ function fbs_availability_holdings($provider_ids) {
       {
         $item_holding->materials[0]->available = 0;
       }
+      /*
+       * we have to loop all materials , else it does not work for periodika.
+       */
+      $non_home_material_group = explode(PHP_EOL,variable_get('fbs_nonhome_material_groups', ''));
+      foreach($item_holding->materials as $index => &$material)
+      {
+          if(in_array($material->materialGroupName,$non_home_material_group))
+          {
+              $material->available = 0;
+          }
+      }
       // Add material description.
       $material_description = $item_holding->materials;
       if (variable_get('fbs_show_material_group', 0) && $material_description[0]) {
