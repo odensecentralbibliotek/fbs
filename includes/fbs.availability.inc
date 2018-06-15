@@ -251,34 +251,34 @@ function fbs_availability_holdings($provider_ids) {
       $placement_string = implode(' > ', $result_holding['placement']);
 
       // Count available materials.
-      foreach ($item_holding->materials as $material) {
+      foreach ($item_holding->materials as $mat) {
         $result[$item->recordId]['total_count']++;
         $result_holding['total_count']++;
-        if ($material->available) {
+        if ($mat->available) {
           $result_holding['available_count']++;
           $result[$item->recordId]['available'] = TRUE;
         }
 
-        if ($material->periodical) {
+        if ($mat->periodical) {
           // Add to issues.
-          $key = (!empty($material->periodical->volumeYear) ?
-                  $material->periodical->volumeYear : '') . ':' .
-               $material->periodical->volume . ':' .
-               (!empty($material->periodical->volumeNumber) ?
-               $material->periodical->volumeNumber : '') . ':' .
+          $key = (!empty($mat->periodical->volumeYear) ?
+                  $mat->periodical->volumeYear : '') . ':' .
+               $mat->periodical->volume . ':' .
+               (!empty($mat->periodical->volumeNumber) ?
+               $mat->periodical->volumeNumber : '') . ':' .
                $placement_string;
           if (isset($tmp_issues[$key])) {
-            $tmp_issues[$key]['available'] += $material->available ? 1 : 0;
+            $tmp_issues[$key]['available'] += $mat->available ? 1 : 0;
             $tmp_issues[$key]['total'] += 1;
           }
           else {
             $tmp_issues[$key] = array(
-              'vol' => $material->periodical->volume . (!empty($material->periodical->volumeNumber) ? '-' . $material->periodical->volumeNumber : ''),
-              'year' => $material->periodical->volumeYear,
-              'available' => $material->available ? 1 : 0,
+              'vol' => $mat->periodical->volume . (!empty($mat->periodical->volumeNumber) ? '-' . $mat->periodical->volumeNumber : ''),
+              'year' => $mat->periodical->volumeYear,
+              'available' => $mat->available ? 1 : 0,
               'total' => 1,
               'placement' => $placement_string,
-              'local_id' => _fbs_periodical_get_local_id($item->recordId, $material->periodical),
+              'local_id' => _fbs_periodical_get_local_id($item->recordId, $mat->periodical),
             );
           }
         }
