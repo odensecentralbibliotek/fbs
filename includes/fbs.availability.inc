@@ -125,6 +125,7 @@ function fbs_availability_holdings($provider_ids) {
               $material->available = 0;
           }
       }
+      unset($material);
       // Add material description.
       $material_description = $item_holding->materials;
       if (variable_get('fbs_show_material_group', 0) && $material_description[0]) {
