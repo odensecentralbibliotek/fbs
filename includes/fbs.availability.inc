@@ -131,14 +131,17 @@ function fbs_availability_holdings($provider_ids) {
       if (variable_get('fbs_show_material_group', 0) && $material_description[0]) {
         $result_holding['placement'][] = $material_description[0]->materialGroupName;
       }
-
+      if(!isset($provider_ids[0]))
+      {
+          continue;
+      }
       $entity_id = variable_get('ting_agency', FALSE) . "-katalog:".$provider_ids[0];
       $suffix_type = variable_get('fbs_holdings_suffix_type', 'simple');
       /*
        * Dont use the slower shelf_mark on the search pages...
        * we use HTTP_REFERER because it is an ajax call.
        */
-      if ($suffix_type == 'simple' || strpos($_SERVER['HTTP_REFERER'], '/search/ting/') !== false) {
+      if ($suffix_type == 'simple' || strpos($_SERVER['HTTP_REFERER'], '/search/ting/') !== false || (isset($_SESSION["inspiration_marcx_disable"]) && $_SESSION["inspiration_marcx_disable"])) {
         // Load entity by the provider id.
         $entity = ding_entity_load($entity_id);
         /* sometimes it fails to load the entity ? */
