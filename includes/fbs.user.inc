@@ -166,8 +166,6 @@ function fbs_user_update_pincode($account, $new_pincode) {
  *   The users CPR/borrow id.
  * @param string $pin_code
  *   Selected pin code.
- * @param string $name
- *   The borrowers name.
  * @param string $mail
  *   The borrowers e-mail.
  * @param string $branch_id
@@ -176,8 +174,8 @@ function fbs_user_update_pincode($account, $new_pincode) {
  * @throws \Exception
  *   If the user exists at the provider.
  */
-function fbs_user_create($cpr, $pin_code, $name, $mail, $branch_id,$phone) {
-  try {
+function fbs_user_create($cpr, $pin_code, $mail, $branch_id, $phone) {
+    try {
     $create_request = new FBS\Model\CreatePatronRequest();
     $create_request->cprNumber = $cpr;
     $create_request->pincode = $pin_code;
