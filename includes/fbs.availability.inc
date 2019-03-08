@@ -165,7 +165,8 @@ function fbs_availability_holdings($provider_ids) {
         $field652m = fbs_get_marc_field($entity, '652', 'm');
         $field652o = fbs_get_marc_field($entity, '652', 'o');
         $field652p = fbs_get_marc_field($entity, '652', 'p');
-
+        
+       
         // Special handling for music:
         // Field 039.a and 039.b is used for data about music shelf_mark, so we
         // use this as an indicator for music materials.
@@ -186,9 +187,15 @@ function fbs_availability_holdings($provider_ids) {
             {
                 $suffix .= $field652m;
             }
-            else
+            else if($field652o != null)
             {
                 $suffix .= $field652o;
+            }
+            else
+            {
+                //attempt grab for field 654m
+              $field654m = fbs_get_marc_field($entity, '654', 'm');
+              $suffix .= $field654m;
             }
              // Additonal descriptors from the DK5 classification.
             if ($field652b = fbs_get_marc_field($entity, '652', 'b')) {
