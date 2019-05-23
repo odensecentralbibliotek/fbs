@@ -77,7 +77,7 @@ function fbs_field_default_field_bases() {
     'locked' => 0,
     'module' => 'fbs',
     'settings' => array(
-      'profile2_private' => 0,
+      'profile2_private' => FALSE,
     ),
     'storage' => array(
       'active' => 1,

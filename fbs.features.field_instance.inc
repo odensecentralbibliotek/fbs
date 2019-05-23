@@ -53,7 +53,7 @@ function fbs_field_default_field_instances() {
         'module' => 'fbs',
         'settings' => array(),
         'type' => 'fbs_default',
-        'weight' => 3,
+        'weight' => 4,
       ),
     ),
     'entity_type' => 'profile2',
@@ -78,7 +78,11 @@ function fbs_field_default_field_instances() {
   // Exported field_instance: 'profile2-provider_fbs-field_fbs_mail_notification'
   $field_instances['profile2-provider_fbs-field_fbs_mail_notification'] = array(
     'bundle' => 'provider_fbs',
-    'default_value' => NULL,
+    'default_value' => array(
+      0 => array(
+        'value' => 0,
+      ),
+    ),
     'deleted' => 0,
     'description' => '',
     'display' => array(
@@ -87,13 +91,13 @@ function fbs_field_default_field_instances() {
         'module' => 'fbs',
         'settings' => array(),
         'type' => 'fbs_notification',
-        'weight' => 4,
+        'weight' => 5,
       ),
     ),
     'entity_type' => 'profile2',
     'field_name' => 'field_fbs_mail_notification',
     'label' => 'E-mail notifications',
-    'required' => 0,
+    'required' => FALSE,
     'settings' => array(
       'user_register_form' => FALSE,
     ),
@@ -101,7 +105,7 @@ function fbs_field_default_field_instances() {
       'active' => 1,
       'module' => 'fbs',
       'settings' => array(
-        'display_label' => 1,
+        'display_label' => 0,
       ),
       'type' => 'fbs_options_onoff',
       'weight' => 5,
@@ -151,7 +155,7 @@ function fbs_field_default_field_instances() {
         'module' => 'fbs',
         'settings' => array(),
         'type' => 'fbs_period_default',
-        'weight' => 8,
+        'weight' => 7,
       ),
     ),
     'entity_type' => 'profile2',
@@ -216,7 +220,7 @@ function fbs_field_default_field_instances() {
         'module' => 'fbs',
         'settings' => array(),
         'type' => 'fbs_notification',
-        'weight' => 5,
+        'weight' => 3,
       ),
     ),
     'entity_type' => 'profile2',
@@ -249,7 +253,7 @@ function fbs_field_default_field_instances() {
         'module' => 'fbs',
         'settings' => array(),
         'type' => 'fbs_preferred_branch',
-        'weight' => 7,
+        'weight' => 6,
       ),
     ),
     'entity_type' => 'profile2',
