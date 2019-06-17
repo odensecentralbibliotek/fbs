@@ -152,7 +152,8 @@ function fbs_reservation_create($account, $record_id, $options) {
       case 'patron_is_blocked':
       case 'loaning_profile_not_found':
       case 'patron_not_found':
-        throw new DingProviderReservationNotAllowed();
+            case 'previously_loaned_by_homebound_patron':
+                throw new DingProviderReservationNotAllowed();
 
       case 'material_not_loanable':
       case 'material_not_reservable':
