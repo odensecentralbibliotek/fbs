@@ -136,7 +136,15 @@ function fbs_availability_holdings($provider_ids) {
           continue;
       }
       $entity_id = variable_get('ting_agency', FALSE) . "-katalog:".$provider_ids[0];
-      $suffix_type = variable_get('fbs_holdings_suffix_type', 'simple');
+      $suffix_type = 'simple';
+      if(isset($_POST['suffix_type_simplify']) && $_POST['suffix_type_simplify'])
+      {
+        
+      }
+      else
+      {
+          $suffix_type = variable_get('fbs_holdings_suffix_type', 'simple');
+      }
       /*
        * Dont use the slower shelf_mark on the search pages...
        * we use HTTP_REFERER because it is an ajax call.
