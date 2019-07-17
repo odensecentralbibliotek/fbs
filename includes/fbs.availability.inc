@@ -337,6 +337,10 @@ function fbs_availability_holdings($provider_ids) {
  *  Helper to get the value of the specified marc field.
  */
 function fbs_get_marc_field($entity, $field, $subfield = NULL) {
+  if(!is_object($entity))
+  {
+      return null;
+  }
   $value = $entity->getValue($field, $subfield);
 
   // Ensure single value returned if subfield is specified.
