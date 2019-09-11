@@ -14,10 +14,14 @@
  * @return array
  *   Loan information.
  */
-function fbs_loan_list($account) {
+function fbs_loan_list($account,$raw = false) {
   $res = array();
   try {
     $res = fbs_service()->MaterialLoans->getLoans(fbs_service()->agencyId, fbs_patron_id($account));
+    if($raw == true)
+    {
+        return $res;
+    }
   }
   catch (Exception $e) {
     watchdog_exception('fbs', $e);

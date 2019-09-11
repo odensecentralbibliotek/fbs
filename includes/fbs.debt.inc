@@ -14,12 +14,16 @@
  * @return array
  *   Debt information.
  */
-function fbs_debt_list($account,$include_nonpayable = true) {
+function fbs_debt_list($account,$include_nonpayable = true,$raw = false) {
   $result = array();
   $res = array();
 
   try {
     $res = fbs_service()->Payment->getFees(fbs_service()->agencyId, fbs_patron_id($account), FALSE, $include_nonpayable);
+    if($raw == true)
+    {
+        return $res;
+    }
   }
   catch (Exception $e) {
     watchdog_exception('fbs', $e);

@@ -16,10 +16,14 @@
  * @return array
  *   Reservation info.
  */
-function fbs_reservation_list($account, $requested_type = NULL) {
+function fbs_reservation_list($account, $requested_type = NULL,$raw) {
   $res = array();
   try {
     $res = fbs_service()->Reservations->getReservations(fbs_service()->agencyId, fbs_patron_id($account));
+    if($raw == true)
+    {
+        return $res;
+    }
   }
   catch (Exception $e) {
     watchdog_exception('fbs', $e);
