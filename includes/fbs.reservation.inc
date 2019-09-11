@@ -16,7 +16,7 @@
  * @return array
  *   Reservation info.
  */
-function fbs_reservation_list($account, $requested_type = NULL,$raw) {
+function fbs_reservation_list($account, $requested_type = NULL,$raw = false) {
   $res = array();
   try {
     $res = fbs_service()->Reservations->getReservations(fbs_service()->agencyId, fbs_patron_id($account));
