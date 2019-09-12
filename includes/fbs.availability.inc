@@ -149,7 +149,7 @@ function fbs_availability_holdings($provider_ids) {
        * Dont use the slower shelf_mark on the search pages...
        * we use HTTP_REFERER because it is an ajax call.
        */
-      if ($suffix_type == 'simple' || strpos($_SERVER['HTTP_REFERER'], '/search/ting/') !== false || (isset($_SESSION["inspiration_marcx_disable"]) && $_SESSION["inspiration_marcx_disable"])) {
+      if ($suffix_type == 'simple' || (isset($_SESSION["inspiration_marcx_disable"]) && $_SESSION["inspiration_marcx_disable"])) {
         // Load entity by the provider id.
         $entity = ding_entity_load($entity_id);
         /* sometimes it fails to load the entity ? */
