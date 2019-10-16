@@ -57,7 +57,7 @@ function fbs_availability_holdings($provider_ids) {
 
   $result = array();
   $tmp_issues = array();
-  foreach ($holdings as $index => $item) {
+  foreach ($holdings as $holdings_index => $item) {
     $result[$item->recordId] = array(
       'reservable' => $item->reservable,
       // Gets properly set in the loop later.
@@ -131,7 +131,7 @@ function fbs_availability_holdings($provider_ids) {
       if (variable_get('fbs_show_material_group', 0) && $material_description[0]) {
         $result_holding['placement'][] = $material_description[0]->materialGroupName;
       }
-      if(!isset($provider_ids[$index-1]))
+      if(!isset($provider_ids[$holdings_index]))
       {
           continue;
       }
