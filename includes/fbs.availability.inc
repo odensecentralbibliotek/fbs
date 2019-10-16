@@ -57,7 +57,7 @@ function fbs_availability_holdings($provider_ids) {
 
   $result = array();
   $tmp_issues = array();
-  foreach ($holdings as $item) {
+  foreach ($holdings as $index => $item) {
     $result[$item->recordId] = array(
       'reservable' => $item->reservable,
       // Gets properly set in the loop later.
@@ -131,11 +131,11 @@ function fbs_availability_holdings($provider_ids) {
       if (variable_get('fbs_show_material_group', 0) && $material_description[0]) {
         $result_holding['placement'][] = $material_description[0]->materialGroupName;
       }
-      if(!isset($provider_ids[0]))
+      if(!isset($provider_ids[$index]))
       {
           continue;
       }
-      $entity_id = variable_get('ting_agency', FALSE) . "-katalog:".$provider_ids[0];
+     
       $suffix_type = 'simple';
       if(isset($_POST['suffix_type_simplify']) && $_POST['suffix_type_simplify'])
       {
@@ -145,12 +145,15 @@ function fbs_availability_holdings($provider_ids) {
       {
           $suffix_type = variable_get('fbs_holdings_suffix_type', 'simple');
       }
+ 
       /*
        * Dont use the slower shelf_mark on the search pages...
        * we use HTTP_REFERER because it is an ajax call.
        */
       if ($suffix_type == 'simple' || (isset($_SESSION["inspiration_marcx_disable"]) && $_SESSION["inspiration_marcx_disable"])) {
         // Load entity by the provider id.
+        
+        $entity_id = $item->recordId; // we need to know the well id ?!
         $entity = ding_entity_load($entity_id);
         /* sometimes it fails to load the entity ? */
         if(isset($entity) && is_object($entity))
@@ -168,6 +171,8 @@ function fbs_availability_holdings($provider_ids) {
       }
       elseif ($suffix_type == 'shelf_mark') {
         module_load_include('client.inc', 'ting');
+        
+        $entity_id = variable_get('ting_agency', FALSE) . "-katalog:". $item->recordId;
         $entity = ting_get_object_marcxchange($entity_id);
         $suffix = '';
         $field652m = fbs_get_marc_field($entity, '652', 'm');
