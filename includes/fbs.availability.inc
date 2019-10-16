@@ -131,7 +131,7 @@ function fbs_availability_holdings($provider_ids) {
       if (variable_get('fbs_show_material_group', 0) && $material_description[0]) {
         $result_holding['placement'][] = $material_description[0]->materialGroupName;
       }
-      if(!isset($provider_ids[$index]))
+      if(!isset($provider_ids[$index-1]))
       {
           continue;
       }
