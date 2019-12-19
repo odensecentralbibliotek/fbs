@@ -92,6 +92,23 @@ function fbs_availability_holdings($provider_ids) {
           $result_holding['placement'][] = $item_holding->{$part}->title;
         }
       }
+
+      $non_home_locations = explode(PHP_EOL,variable_get('fbs_nonreserveable_locations', ''));
+             foreach ($result_holding['placement'] as $part) {
+                foreach($non_home_locations as $non_home)
+                {
+                    if(!strcmp(trim($part),trim($non_home)))
+                    {
+                        for($i = 0; $i < sizeof($item_holding->materials);$i++)
+                        {
+                            //$item_holding->materials[$i]->available = FALSE;
+                            $item_holding->materials[$i]->reserveable = FALSE;
+                            
+                        }
+                    }
+                }
+          }
+
       //check if it is in a non home location
       $non_home_locations = explode(PHP_EOL,variable_get('fbs_nonhome_locations', ''));
       foreach ($result_holding['placement']as $part) {
@@ -102,6 +119,7 @@ function fbs_availability_holdings($provider_ids) {
                 for($i = 0; $i < sizeof($item_holding->materials);$i++)
                 {
                     $item_holding->materials[$i]->available = FALSE;
+                    
                 }
                 break;
               }
@@ -268,12 +286,17 @@ function fbs_availability_holdings($provider_ids) {
       $placement_string = implode(' > ', $result_holding['placement']);
 
       // Count available materials.
+      $reserable_materials_count = 0;
       foreach ($item_holding->materials as $mat) {
         $result[$item->recordId]['total_count']++;
         $result_holding['total_count']++;
         if ($mat->available) {
           $result_holding['available_count']++;
           $result[$item->recordId]['available'] = TRUE;
+        }
+        if(!isset($mat->reserveable) || $mat->reserveable == true)
+        {
+          $reserable_materials_count++;
         }
 
         if ($mat->periodical) {
@@ -299,6 +322,10 @@ function fbs_availability_holdings($provider_ids) {
             );
           }
         }
+      }
+      if($reserable_materials_count == 0)
+      {
+        $result[$item->recordId]['reservable'] = false;
       }
       $result[$item->recordId]['holdings'][] = $result_holding;
     }
