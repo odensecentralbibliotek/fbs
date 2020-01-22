@@ -327,6 +327,9 @@ function fbs_availability_holdings($provider_ids) {
       {
         $result[$item->recordId]['reservable'] = false;
       }
+      else{
+        $result[$item->recordId]['reservable'] = true;
+      }
       $result[$item->recordId]['holdings'][] = $result_holding;
     }
 
