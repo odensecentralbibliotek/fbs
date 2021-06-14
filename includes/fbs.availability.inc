@@ -196,6 +196,7 @@ function fbs_availability_holdings($provider_ids) {
         $field652m = fbs_get_marc_field($entity, '652', 'm');
         $field652o = fbs_get_marc_field($entity, '652', 'o');
         $field652p = fbs_get_marc_field($entity, '652', 'p');
+        $field654m = fbs_get_marc_field($entity, '654', 'm');
 
         // Special handling for music:
         // Field 039.a and 039.b is used for data about music shelf_mark, so we
@@ -217,23 +218,42 @@ function fbs_availability_holdings($provider_ids) {
             {
                 $suffix .= $field652m;
             }
-            else
+            else if($field652o != null) 
             {
                 $suffix .= $field652o;
             }
-             // Additonal descriptors from the DK5 classification.
+            else {
+                $suffix .= $field654m;
+            }
+            // Additonal descriptors from the DK5 classification.
             if ($field652b = fbs_get_marc_field($entity, '652', 'b')) {
               $suffix .= ' ' . $field652b;
             }
             if($field652m == "99.4"){
                 
             if ($field652a = fbs_get_marc_field($entity, '652', 'a')) {
-              $suffix .= ' ' . $field652a;
-              if ($field652h = fbs_get_marc_field($entity, '652', 'h')) {
-                $suffix .= ', ' . $field652h;
+                $suffix .= ' ' . $field652a;
+                if ($field652h = fbs_get_marc_field($entity, '652', 'h')) {
+                  $suffix .= ', ' . $field652h;
+                }
               }
             }
-          }
+
+            // Additonal descriptors from the old DK5 classification.
+            if($field652m === null) {
+              if ($field654b = fbs_get_marc_field($entity, '654', 'b')) {
+                $suffix .= ' ' . $field654b;
+              }
+              if($field654m == "99.4"){
+                if ($field654a = fbs_get_marc_field($entity, '654', 'a')) {
+                  $suffix .= ' ' . $field654a;
+                  if ($field654h = fbs_get_marc_field($entity, '654', 'h')) {
+                    $suffix .= ', ' . $field654h;
+                  }
+                }
+              }
+            }
+      
         }
 
         // Generate and append the standard suffix for ALMA shelf_mark. We prefer
