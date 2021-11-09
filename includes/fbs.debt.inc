@@ -38,8 +38,9 @@ function fbs_debt_list($account,$include_nonpayable = true,$raw = false) {
 
     $data = array(
       'date' => $fee->creationDate,
+      'duedate' => $fee->dueDate,
       'display_name' => $fee->reasonMessage,
-      'payableByClient' => $fee->payableByClient,
+      'payable' => $fee->payableByClient,
       // FBS only provides the amount left to be paid on each fee, so this
       // will only reflect that.
       'amount' => $fee->amount,
@@ -61,7 +62,10 @@ function fbs_debt_list($account,$include_nonpayable = true,$raw = false) {
       // If there's only one material, use its title as display_name;
       if (count($record_ids) == 1) {
         $entity = ding_entity_load(ding_provider_build_entity_id(reset($record_ids)));
-        $data['display_name'] = isset($entity) && $entity != false ? $entity->getTitle(): "could not load title";
+        $data['display_name']  = t('@material_title (@material_number)', array(
+          '@material_title' => $entity->getTitle(),
+          '@material_number' => $material->materialItemNumber,
+        ));
       }
       elseif (count($record_ids) > 1) {
         $data['display_name'] = count($record_ids) . ' ' . t('materialer');
@@ -103,6 +107,7 @@ function fbs_debt_payment_received($account, $debt_ids = array(), $order_id = NU
   }
   catch (Exception $e) {
     watchdog_exception('fbs', $e);
+    return FALSE;
   }
 
   foreach ($res as $confirmation) {
