@@ -14,64 +14,15 @@ namespace Psr\Http\Message;
  * - Headers
  * - Message body
  *
+ * During construction, implementations MUST attempt to set the Host header from
+ * a provided URI if no Host header is provided.
+ *
  * Requests are considered immutable; all methods that might change state MUST
  * be implemented such that they retain the internal state of the current
- * message and return a new instance that contains the changed state.
+ * message and return an instance that contains the changed state.
  */
 interface RequestInterface extends MessageInterface
 {
-    /**
-     * Extends MessageInterface::getHeaders() to provide request-specific
-     * behavior.
-     *
-     * Retrieves all message headers.
-     *
-     * This method acts exactly like MessageInterface::getHeaders(), with one
-     * behavioral change: if the Host header has not been previously set, the
-     * method MUST attempt to pull the host segment of the composed URI, if
-     * present.
-     *
-     * @see MessageInterface::getHeaders()
-     * @see UriInterface::getHost()
-     * @return array Returns an associative array of the message's headers. Each
-     *     key MUST be a header name, and each value MUST be an array of strings.
-     */
-    public function getHeaders();
-
-    /**
-     * Extends MessageInterface::getHeader() to provide request-specific
-     * behavior.
-     *
-     * This method acts exactly like MessageInterface::getHeader(), with
-     * one behavioral change: if the Host header is requested, but has
-     * not been previously set, the method MUST attempt to pull the host
-     * segment of the composed URI, if present.
-     *
-     * @see MessageInterface::getHeader()
-     * @see UriInterface::getHost()
-     * @param string $name Case-insensitive header field name.
-     * @return string
-     */
-    public function getHeader($name);
-
-    /**
-     * Extends MessageInterface::getHeaderLines() to provide request-specific
-     * behavior.
-     *
-     * Retrieves a header by the given case-insensitive name as an array of strings.
-     *
-     * This method acts exactly like MessageInterface::getHeaderLines(), with
-     * one behavioral change: if the Host header is requested, but has
-     * not been previously set, the method MUST attempt to pull the host
-     * segment of the composed URI, if present.
-     *
-     * @see MessageInterface::getHeaderLines()
-     * @see UriInterface::getHost()
-     * @param string $name Case-insensitive header field name.
-     * @return string[]
-     */
-    public function getHeaderLines($name);
-
     /**
      * Retrieves the message's request target.
      *
@@ -91,7 +42,7 @@ interface RequestInterface extends MessageInterface
     public function getRequestTarget();
 
     /**
-     * Create a new instance with a specific request-target.
+     * Return an instance with the specific request-target.
      *
      * If the request needs a non-origin-form request-target — e.g., for
      * specifying an absolute-form, authority-form, or asterisk-form —
@@ -99,13 +50,13 @@ interface RequestInterface extends MessageInterface
      * request-target, verbatim.
      *
      * This method MUST be implemented in such a way as to retain the
-     * immutability of the message, and MUST return a new instance that has the
+     * immutability of the message, and MUST return an instance that has the
      * changed request target.
      *
-     * @link http://tools.ietf.org/html/rfc7230#section-2.7 (for the various
+     * @link http://tools.ietf.org/html/rfc7230#section-5.3 (for the various
      *     request-target forms allowed in request messages)
      * @param mixed $requestTarget
-     * @return self
+     * @return static
      */
     public function withRequestTarget($requestTarget);
 
@@ -117,18 +68,18 @@ interface RequestInterface extends MessageInterface
     public function getMethod();
 
     /**
-     * Create a new instance with the provided HTTP method.
+     * Return an instance with the provided HTTP method.
      *
      * While HTTP method names are typically all uppercase characters, HTTP
      * method names are case-sensitive and thus implementations SHOULD NOT
      * modify the given string.
      *
      * This method MUST be implemented in such a way as to retain the
-     * immutability of the message, and MUST return a new instance that has the
+     * immutability of the message, and MUST return an instance that has the
      * changed request method.
      *
-     * @param string $method Case-insensitive method.
-     * @return self
+     * @param string $method Case-sensitive method.
+     * @return static
      * @throws \InvalidArgumentException for invalid HTTP methods.
      */
     public function withMethod($method);
@@ -140,20 +91,39 @@ interface RequestInterface extends MessageInterface
      *
      * @link http://tools.ietf.org/html/rfc3986#section-4.3
      * @return UriInterface Returns a UriInterface instance
-     *     representing the URI of the request, if any.
+     *     representing the URI of the request.
      */
     public function getUri();
 
     /**
-     * Create a new instance with the provided URI.
+     * Returns an instance with the provided URI.
+     *
+     * This method MUST update the Host header of the returned request by
+     * default if the URI contains a host component. If the URI does not
+     * contain a host component, any pre-existing Host header MUST be carried
+     * over to the returned request.
+     *
+     * You can opt-in to preserving the original state of the Host header by
+     * setting `$preserveHost` to `true`. When `$preserveHost` is set to
+     * `true`, this method interacts with the Host header in the following ways:
+     *
+     * - If the Host header is missing or empty, and the new URI contains
+     *   a host component, this method MUST update the Host header in the returned
+     *   request.
+     * - If the Host header is missing or empty, and the new URI does not contain a
+     *   host component, this method MUST NOT update the Host header in the returned
+     *   request.
+     * - If a Host header is present and non-empty, this method MUST NOT update
+     *   the Host header in the returned request.
      *
      * This method MUST be implemented in such a way as to retain the
-     * immutability of the message, and MUST return a new instance that has the
+     * immutability of the message, and MUST return an instance that has the
      * new UriInterface instance.
      *
      * @link http://tools.ietf.org/html/rfc3986#section-4.3
      * @param UriInterface $uri New request URI to use.
-     * @return self
+     * @param bool $preserveHost Preserve the original state of the Host header.
+     * @return static
      */
-    public function withUri(UriInterface $uri);
+    public function withUri(UriInterface $uri, $preserveHost = false);
 }

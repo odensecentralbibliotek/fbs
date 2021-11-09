@@ -14,17 +14,16 @@ use Psr\Http\Message\ResponseInterface;
 class Server
 {
     /**
-     * Level of output buffering at start of listen cycle; never flush more
-     * than this.
-     *
-     * @var int
-     */
-    private $bufferLevel;
-
-    /**
      * @var callable
      */
     private $callback;
+
+    /**
+     * Response emitter to use; by default, uses Response\SapiEmitter.
+     *
+     * @var Response\EmitterInterface
+     */
+    private $emitter;
 
     /**
      * @var ServerRequestInterface
@@ -71,6 +70,16 @@ class Server
     }
 
     /**
+     * Set alternate response emitter to use.
+     *
+     * @param Response\EmitterInterface $emitter
+     */
+    public function setEmitter(Response\EmitterInterface $emitter)
+    {
+        $this->emitter = $emitter;
+    }
+
+    /**
      * Create a Server instance
      *
      * Creates a server instance from the callback and the following
@@ -88,7 +97,7 @@ class Server
      * @param array $body
      * @param array $cookies
      * @param array $files
-     * @return self
+     * @return static
      */
     public static function createServer(
         callable $callback,
@@ -100,7 +109,7 @@ class Server
     ) {
         $request  = ServerRequestFactory::fromGlobals($server, $query, $body, $cookies, $files);
         $response = new Response();
-        return new self($callback, $request, $response);
+        return new static($callback, $request, $response);
     }
 
     /**
@@ -114,7 +123,7 @@ class Server
      * @param callable $callback
      * @param ServerRequestInterface $request
      * @param null|ResponseInterface $response
-     * @return self
+     * @return static
      */
     public static function createServerFromRequest(
         callable $callback,
@@ -124,7 +133,7 @@ class Server
         if (! $response) {
             $response = new Response();
         }
-        return new self($callback, $request, $response);
+        return new static($callback, $request, $response);
     }
 
     /**
@@ -142,90 +151,30 @@ class Server
     public function listen(callable $finalHandler = null)
     {
         $callback = $this->callback;
+
         ob_start();
-        $this->bufferLevel = ob_get_level();
+        $bufferLevel = ob_get_level();
+
         $response = $callback($this->request, $this->response, $finalHandler);
         if (! $response instanceof ResponseInterface) {
             $response = $this->response;
         }
-        $this->send($response);
+        $this->getEmitter()->emit($response, $bufferLevel);
     }
 
     /**
-     * Send the response
+     * Retrieve the current response emitter.
      *
-     * If headers have not yet been sent, they will be.
+     * If none has been registered, lazy-loads a Response\SapiEmitter.
      *
-     * If any output buffering remains active, it will be flushed.
-     *
-     * Finally, the response body will be emitted.
-     *
-     * @param ResponseInterface $response
+     * @return Response\EmitterInterface
      */
-    private function send(ResponseInterface $response)
+    private function getEmitter()
     {
-        if (! headers_sent()) {
-            $this->sendHeaders($response);
+        if (! $this->emitter) {
+            $this->emitter = new Response\SapiEmitter();
         }
 
-        while (ob_get_level() >= $this->bufferLevel) {
-            ob_end_flush();
-        }
-
-        $this->bufferLevel = null;
-
-        echo $response->getBody();
-    }
-
-    /**
-     * Send response headers
-     *
-     * Sends the response status/reason, followed by all headers;
-     * header names are filtered to be word-cased.
-     *
-     * @param ResponseInterface $response
-     */
-    private function sendHeaders(ResponseInterface $response)
-    {
-        if ($response->getReasonPhrase()) {
-            header(sprintf(
-                'HTTP/%s %d %s',
-                $response->getProtocolVersion(),
-                $response->getStatusCode(),
-                $response->getReasonPhrase()
-            ));
-        } else {
-            header(sprintf(
-                'HTTP/%s %d',
-                $response->getProtocolVersion(),
-                $response->getStatusCode()
-            ));
-        }
-
-        foreach ($response->getHeaders() as $header => $values) {
-            $name  = $this->filterHeader($header);
-            $first = true;
-            foreach ($values as $value) {
-                header(sprintf(
-                    '%s: %s',
-                    $name,
-                    $value
-                ), $first);
-                $first = false;
-            }
-        }
-    }
-
-    /**
-     * Filter a header name to wordcase
-     *
-     * @param string $header
-     * @return string
-     */
-    private function filterHeader($header)
-    {
-        $filtered = str_replace('-', ' ', $header);
-        $filtered = ucwords($filtered);
-        return str_replace(' ', '-', $filtered);
+        return $this->emitter;
     }
 }

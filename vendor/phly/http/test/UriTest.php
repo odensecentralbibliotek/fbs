@@ -208,29 +208,29 @@ class UriTest extends TestCase
         $this->assertEquals($url, (string) $uri);
     }
 
-    public function testSettingEmptyPathOnAbsoluteUriIsEquivalentToSettingRootPath()
+    public function testSettingEmptyPathOnAbsoluteUriReturnsAnEmptyPath()
     {
         $uri = new Uri('http://example.com/foo');
         $new = $uri->withPath('');
-        $this->assertEquals('/', $new->getPath());
+        $this->assertEquals('', $new->getPath());
     }
 
-    public function testStringRepresentationOfAbsoluteUriWithNoPathNormalizesPath()
+    public function testStringRepresentationOfAbsoluteUriWithNoPathSetsAnEmptyPath()
     {
         $uri = new Uri('http://example.com');
-        $this->assertEquals('http://example.com/', (string) $uri);
+        $this->assertEquals('http://example.com', (string) $uri);
     }
 
-    public function testEmptyPathOnOriginFormIsEquivalentToRootPath()
+    public function testEmptyPathOnOriginFormRemainsAnEmptyPath()
     {
         $uri = new Uri('?foo=bar');
-        $this->assertEquals('/', $uri->getPath());
+        $this->assertEquals('', $uri->getPath());
     }
 
-    public function testStringRepresentationOfOriginFormWithNoPathNormalizesPath()
+    public function testStringRepresentationOfOriginFormWithNoPathRetainsEmptyPath()
     {
         $uri = new Uri('?foo=bar');
-        $this->assertEquals('/?foo=bar', (string) $uri);
+        $this->assertEquals('?foo=bar', (string) $uri);
     }
 
     public function invalidConstructorUris()
@@ -255,6 +255,12 @@ class UriTest extends TestCase
         new Uri($uri);
     }
 
+    public function testConstructorRaisesExceptionForSeriouslyMalformedURI()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        new Uri('http:///www.php-fig.org/');
+    }
+
     public function testMutatingSchemeStripsOffDelimiter()
     {
         $uri = new Uri('http://example.com');
@@ -276,18 +282,34 @@ class UriTest extends TestCase
     /**
      * @dataProvider invalidSchemes
      */
-    public function testMutatingWithNonWebSchemeRaisesAnException($scheme)
+    public function testConstructWithUnsupportedSchemeRaisesAnException($scheme)
+    {
+        $this->setExpectedException('InvalidArgumentException', 'Unsupported scheme');
+        $uri = new Uri($scheme . '://example.com');
+    }
+
+    /**
+     * @dataProvider invalidSchemes
+     */
+    public function testMutatingWithUnsupportedSchemeRaisesAnException($scheme)
     {
         $uri = new Uri('http://example.com');
         $this->setExpectedException('InvalidArgumentException', 'Unsupported scheme');
         $uri->withScheme($scheme);
     }
 
-    public function testPathIsPrefixedWithSlashIfSetWithoutOne()
+    public function testPathIsNotPrefixedWithSlashIfSetWithoutOne()
     {
         $uri = new Uri('http://example.com');
         $new = $uri->withPath('foo/bar');
-        $this->assertEquals('/foo/bar', $new->getPath());
+        $this->assertEquals('foo/bar', $new->getPath());
+    }
+
+    public function testPathNotSlashPrefixedIsEmittedWithSlashDelimiterWhenUriIsCastToString()
+    {
+        $uri = new Uri('http://example.com');
+        $new = $uri->withPath('foo/bar');
+        $this->assertEquals('http://example.com/foo/bar', $new->__toString());
     }
 
     public function testStripsQueryPrefixIfPresent()
@@ -322,76 +344,6 @@ class UriTest extends TestCase
             ->withScheme($scheme)
             ->withPort($port);
         $this->assertEquals('example.com', $uri->getAuthority());
-    }
-
-    /**
-     * @group 48
-     */
-    public function testWithSchemeReturnsSameInstanceWhenSchemeDoesNotChange()
-    {
-        $uri = new Uri('http://example.com');
-        $test = $uri->withScheme('http');
-        $this->assertSame($uri, $test);
-    }
-
-    /**
-     * @group 48
-     */
-    public function testWithUserInfoReturnsSameInstanceWhenUserInfoDoesNotChange()
-    {
-        $uri = new Uri('http://me:too@example.com');
-        $test = $uri->withUserInfo('me', 'too');
-        $this->assertSame($uri, $test);
-    }
-
-    /**
-     * @group 48
-     */
-    public function testWithHostReturnsSameInstanceWhenHostDoesNotChange()
-    {
-        $uri = new Uri('http://me:too@example.com');
-        $test = $uri->withHost('example.com');
-        $this->assertSame($uri, $test);
-    }
-
-    /**
-     * @group 48
-     */
-    public function testWithPortReturnsSameInstanceWhenPortDoesNotChange()
-    {
-        $uri = new Uri('http://example.com:8080');
-        $test = $uri->withPort(8080);
-        $this->assertSame($uri, $test);
-    }
-
-    /**
-     * @group 48
-     */
-    public function testWithPathReturnsSameInstanceWhenPathDoesNotChange()
-    {
-        $uri = new Uri('http://example.com/test/path');
-        $test = $uri->withPath('/test/path');
-        $this->assertSame($uri, $test);
-    }
-
-    /**
-     * @group 48
-     */
-    public function testWithQueryReturnsSameInstanceWhenQueryDoesNotChange()
-    {
-        $uri = new Uri('http://example.com/test/path?foo=bar');
-        $test = $uri->withQuery('foo=bar');
-        $this->assertSame($uri, $test);
-    }
-
-    /**
-     * @group 48
-     */
-    public function testWithFragmentReturnsSameInstanceWhenFragmentDoesNotChange()
-    {
-        $uri = new Uri('http://example.com/test/path?foo=bar#/baz/bat');
-        $test = $uri->withFragment('/baz/bat');
-        $this->assertSame($uri, $test);
     }
 
     public function mutations()

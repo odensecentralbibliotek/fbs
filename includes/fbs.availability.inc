@@ -306,7 +306,7 @@ function fbs_availability_holdings($provider_ids) {
       $placement_string = implode(' > ', $result_holding['placement']);
 
       // Count available materials.
-      $reserable_materials_count = 0;
+      settype($reserable_materials_count, "integer");
       foreach ($item_holding->materials as $mat) {
         $result[$item->recordId]['total_count']++;
         $result_holding['total_count']++;

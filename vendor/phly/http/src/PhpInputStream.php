@@ -1,7 +1,6 @@
 <?php
 namespace Phly\Http;
 
-
 /**
  * Caching version of php://input
  */
@@ -27,6 +26,9 @@ class PhpInputStream extends Stream
         parent::__construct($stream, $mode);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function __toString()
     {
         if ($this->reachedEof) {
@@ -37,11 +39,17 @@ class PhpInputStream extends Stream
         return $this->cache;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function isWritable()
     {
         return false;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function read($length)
     {
         $content = parent::read($length);
@@ -56,6 +64,9 @@ class PhpInputStream extends Stream
         return $content;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getContents($maxLength = -1)
     {
         if ($this->reachedEof) {

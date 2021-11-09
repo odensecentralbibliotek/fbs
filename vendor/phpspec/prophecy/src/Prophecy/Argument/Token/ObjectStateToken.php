@@ -11,8 +11,8 @@
 
 namespace Prophecy\Argument\Token;
 
-use SebastianBergmann\Comparator\Factory as ComparatorFactory;
 use SebastianBergmann\Comparator\ComparisonFailure;
+use Prophecy\Comparator\Factory as ComparatorFactory;
 use Prophecy\Util\StringUtil;
 
 /**
@@ -61,11 +61,11 @@ class ObjectStateToken implements TokenInterface
             $actual = call_user_func(array($argument, $this->name));
 
             $comparator = $this->comparatorFactory->getComparatorFor(
-                $actual, $this->value
+                $this->value, $actual
             );
 
             try {
-                $comparator->assertEquals($actual, $this->value);
+                $comparator->assertEquals($this->value, $actual);
                 return 8;
             } catch (ComparisonFailure $failure) {
                 return false;

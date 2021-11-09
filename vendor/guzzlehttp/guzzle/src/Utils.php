@@ -1,145 +1,92 @@
 <?php
 namespace GuzzleHttp;
 
-/**
- * Utility methods used throughout Guzzle.
- */
+use GuzzleHttp\Exception\InvalidArgumentException;
+use Psr\Http\Message\UriInterface;
+use Symfony\Polyfill\Intl\Idn\Idn;
+
 final class Utils
 {
     /**
-     * Gets a value from an array using a path syntax to retrieve nested data.
+     * Wrapper for the hrtime() or microtime() functions
+     * (depending on the PHP version, one of the two is used)
      *
-     * This method does not allow for keys that contain "/". You must traverse
-     * the array manually or using something more advanced like JMESPath to
-     * work with keys that contain "/".
+     * @return float|mixed UNIX timestamp
      *
-     *     // Get the bar key of a set of nested arrays.
-     *     // This is equivalent to $collection['foo']['baz']['bar'] but won't
-     *     // throw warnings for missing keys.
-     *     GuzzleHttp\get_path($data, 'foo/baz/bar');
-     *
-     * @param array  $data Data to retrieve values from
-     * @param string $path Path to traverse and retrieve a value from
-     *
-     * @return mixed|null
+     * @internal
      */
-    public static function getPath($data, $path)
+    public static function currentTime()
     {
-        $path = explode('/', $path);
-
-        while (null !== ($part = array_shift($path))) {
-            if (!is_array($data) || !isset($data[$part])) {
-                return null;
-            }
-            $data = $data[$part];
-        }
-
-        return $data;
+        return function_exists('hrtime') ? hrtime(true) / 1e9 : microtime(true);
     }
 
     /**
-     * Set a value in a nested array key. Keys will be created as needed to set
-     * the value.
+     * @param int $options
      *
-     * This function does not support keys that contain "/" or "[]" characters
-     * because these are special tokens used when traversing the data structure.
-     * A value may be prepended to an existing array by using "[]" as the final
-     * key of a path.
+     * @return UriInterface
+     * @throws InvalidArgumentException
      *
-     *     GuzzleHttp\get_path($data, 'foo/baz'); // null
-     *     GuzzleHttp\set_path($data, 'foo/baz/[]', 'a');
-     *     GuzzleHttp\set_path($data, 'foo/baz/[]', 'b');
-     *     GuzzleHttp\get_path($data, 'foo/baz');
-     *     // Returns ['a', 'b']
-     *
-     * @param array  $data  Data to modify by reference
-     * @param string $path  Path to set
-     * @param mixed  $value Value to set at the key
-     *
-     * @throws \RuntimeException when trying to setPath using a nested path
-     *     that travels through a scalar value.
+     * @internal
      */
-    public static function setPath(&$data, $path, $value)
+    public static function idnUriConvert(UriInterface $uri, $options = 0)
     {
-        $current =& $data;
-        $queue = explode('/', $path);
-        while (null !== ($key = array_shift($queue))) {
-            if (!is_array($current)) {
-                throw new \RuntimeException("Trying to setPath {$path}, but "
-                    . "{$key} is set and is not an array");
-            } elseif (!$queue) {
-                if ($key == '[]') {
-                    $current[] = $value;
-                } else {
-                    $current[$key] = $value;
+        if ($uri->getHost()) {
+            $asciiHost = self::idnToAsci($uri->getHost(), $options, $info);
+            if ($asciiHost === false) {
+                $errorBitSet = isset($info['errors']) ? $info['errors'] : 0;
+
+                $errorConstants = array_filter(array_keys(get_defined_constants()), function ($name) {
+                    return substr($name, 0, 11) === 'IDNA_ERROR_';
+                });
+
+                $errors = [];
+                foreach ($errorConstants as $errorConstant) {
+                    if ($errorBitSet & constant($errorConstant)) {
+                        $errors[] = $errorConstant;
+                    }
                 }
-            } elseif (isset($current[$key])) {
-                $current =& $current[$key];
+
+                $errorMessage = 'IDN conversion failed';
+                if ($errors) {
+                    $errorMessage .= ' (errors: ' . implode(', ', $errors) . ')';
+                }
+
+                throw new InvalidArgumentException($errorMessage);
             } else {
-                $current[$key] = [];
-                $current =& $current[$key];
+                if ($uri->getHost() !== $asciiHost) {
+                    // Replace URI only if the ASCII version is different
+                    $uri = $uri->withHost($asciiHost);
+                }
             }
         }
+
+        return $uri;
     }
 
     /**
-     * Expands a URI template
+     * @param string $domain
+     * @param int    $options
+     * @param array  $info
      *
-     * @param string $template  URI template
-     * @param array  $variables Template variables
-     *
-     * @return string
+     * @return string|false
      */
-    public static function uriTemplate($template, array $variables)
+    private static function idnToAsci($domain, $options, &$info = [])
     {
-        if (function_exists('\\uri_template')) {
-            return \uri_template($template, $variables);
+        if (\preg_match('%^[ -~]+$%', $domain) === 1) {
+            return $domain;
         }
 
-        static $uriTemplate;
-        if (!$uriTemplate) {
-            $uriTemplate = new UriTemplate();
+        if (\extension_loaded('intl') && defined('INTL_IDNA_VARIANT_UTS46')) {
+            return \idn_to_ascii($domain, $options, INTL_IDNA_VARIANT_UTS46, $info);
         }
 
-        return $uriTemplate->expand($template, $variables);
-    }
-
-    /**
-     * Wrapper for JSON decode that implements error detection with helpful
-     * error messages.
-     *
-     * @param string $json    JSON data to parse
-     * @param bool $assoc     When true, returned objects will be converted
-     *                        into associative arrays.
-     * @param int    $depth   User specified recursion depth.
-     * @param int    $options Bitmask of JSON decode options.
-     *
-     * @return mixed
-     * @throws \InvalidArgumentException if the JSON cannot be parsed.
-     * @link http://www.php.net/manual/en/function.json-decode.php
-     */
-    public static function jsonDecode($json, $assoc = false, $depth = 512, $options = 0)
-    {
-        static $jsonErrors = [
-            JSON_ERROR_DEPTH => 'JSON_ERROR_DEPTH - Maximum stack depth exceeded',
-            JSON_ERROR_STATE_MISMATCH => 'JSON_ERROR_STATE_MISMATCH - Underflow or the modes mismatch',
-            JSON_ERROR_CTRL_CHAR => 'JSON_ERROR_CTRL_CHAR - Unexpected control character found',
-            JSON_ERROR_SYNTAX => 'JSON_ERROR_SYNTAX - Syntax error, malformed JSON',
-            JSON_ERROR_UTF8 => 'JSON_ERROR_UTF8 - Malformed UTF-8 characters, possibly incorrectly encoded'
-        ];
-
-        $data = \json_decode($json, $assoc, $depth, $options);
-
-        if (JSON_ERROR_NONE !== json_last_error()) {
-            $last = json_last_error();
-            throw new \InvalidArgumentException(
-                'Unable to parse JSON data: '
-                . (isset($jsonErrors[$last])
-                    ? $jsonErrors[$last]
-                    : 'Unknown error')
-            );
+        /*
+         * The Idn class is marked as @internal. Verify that class and method exists.
+         */
+        if (method_exists(Idn::class, 'idn_to_ascii')) {
+            return Idn::idn_to_ascii($domain, $options, Idn::INTL_IDNA_VARIANT_UTS46, $info);
         }
 
-        return $data;
+        throw new \RuntimeException('ext-intl or symfony/polyfill-intl-idn not loaded or too old');
     }
 }

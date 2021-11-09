@@ -2,6 +2,283 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release..
 
+## 0.14.1 - 2015-05-21
+
+### Added
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#72](https://github.com/phly/http/pull/72) ensures that streams used to
+  serialize request/response instances are both readable *and* seekable.
+- [#74](https://github.com/phly/http/pull/74) updates PHPUnit to >= 4.6.
+- [#75](https://github.com/phly/http/pull/75) updates the `Server` tests to
+  flush output after calls to `listen()` so that PHPUnit will see the output.
+  Additionally, it modifies `Server` to pass the current output buffer level
+  to the emitter.
+
+## 0.14.0 - 2015-05-21
+
+### Added
+
+- [#67](https://github.com/phly/http/pull/67) adds two new feature:
+  - Response emitters. `Phly\Http\Response\EmitterInterface` defines the
+    contract for emitters, with the single method `emit()`. A single
+    concrete emitter is provided, `Phly\Http\Response\SapiEmitter`.
+    `Phly\Http\Server` now composes an emitter, using the `SapiEmitter` by
+    default.
+  - Serializers. `Phly\Http\Request\Serializer` and
+    `Phly\Http\Response\Serializer` provide the following static methods:
+    - `fromString($message)` will parse the given message string and return the
+      appropriate message instance.
+    - `fromStream(Psr\Http\Message\StreamInterface $stream)` will parse the
+      given message stream and return the appropriate message instance.
+    - `toString(Psr\Http\Message\RequestInterface|Psr\Http\MessageResponseInterface $message)`
+      will return a string representation of the given message instance.
+- A `CONTRIBUTING.md` file was added.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- Documentation was updated to ensure all components of the package are
+  documented. Documentation that duplicates PSR-7 was removed.
+
+## 0.13.3 - 2015-05-20
+
+### Added
+
+- [#65](https://github.com/phly/http/pull/65) adds a "provides" section to
+  the `composer.json`, with the package `psr/http-message-implementation`,
+  which indicates a virtual package. Packages may list the virtual package as a
+  dependency, and this package, or any other PSR-7 implementation,  will then
+  fulfill it.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#66](https://github.com/phly/http/pull/66) updates the `Stream::attach()`
+  method docblock; the method is not inherited, so needed full documentation.
+- [#68](https://github.com/phly/http/pull/68) updates the `psr/http-message`
+  requirement to `~1.0`, as PSR-7 is now accepted!
+
+## 0.13.2 - 2015-05-14
+
+### Added
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- Updated the `psr/http-message` dependency to look for `^0.11`, allowing it to
+  pick up bugfix releases.
+
+## 0.13.1 - 2015-05-14
+
+This release contains the following security fix:
+
+- [Zend Framework ZF2015-04](http://framework.zend.com/security/advisory/ZF2015-04)
+  detailed HTTP Response Splitting vectors that are possible via HTTP headers,
+  when unfiltered input containing multiple CRLF (`\r\n`) sequences are present.
+  This release contains a patch for the issue, based on the one used in Zend
+  Framework 2.
+
+### Added
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#59](https://github.com/phly/http/pull/59) corrects the exception message
+  thrown from `Stream::read()` to use the verbiage "read" instead of "write".
+- [#62](https://github.com/phly/http/pull/62) ensures that `Uri::parseUri()`
+  raises an exception when `parse_url()` fails.
+- [#63](https://github.com/phly/http/pull/63) patches CRLF message splitting
+  vectors in the request and response implementations. It adds a new class,
+  `Phly\Http\HeaderSecurity`, which can be used to validate or filter header
+  values, and which is used internally to assert valid header values.
+
+## 0.13.0 - 2015-05-04
+
+This release is BACKWARDS IN-COMPATIBLE with previous releases. 
+
+psr/http-message 0.11.0 renames the method
+`Psr\Http\UploadedFileInterface::move()` to `moveTo()`, which presents a
+backwards compatibility break.
+
+### Added
+
+- `Phly\Http\UploadedFile::moveTo()`, which allows moving an uploaded file
+  to a given path as represented by a valid PHP stream/filename.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- `Phly\Http\UploadedFile::move()`, which was replaced with the
+  `moveTo()` method.
+
+### Fixed
+
+- `Phly\Http\Response::getReasonPhrase()` now *always* returns a string, even in
+  cases where the reason phrase is undefined (in which case it will be an
+  empty string).
+- `Phly\Http\Response::withStatus()` now defines the default value of the
+  `$reasonPhrase` argument as an empty string.
+
+## 0.12.0 - 2015-04-14
+
+This release is BACKWARDS IN-COMPATIBLE with previous releases. This is in large
+part due to massive changes between psr/http-message 0.9 and 0.10, which
+include:
+
+- Renaming `Psr\Http\Message\StreamableInterface` to
+  `Psr\Http\Message\StreamInterface`. This will not affect most consumers, but
+  it *does* change the signature of the `getBody()` and `withBody()` methods of
+  both requests and responses.
+- `Psr\Http\Message\UriInterface` now allows empty paths and relative paths,
+  which changes the behavior of `Uri::getPath()`.
+- `Psr\Http\Message\MessageInterface` renamed one method and changed the
+  behavior of another method with regard to headers:
+  - `getHeader($name)` now returns an array of values.
+  - `getHeaderLines($name)` was renamed to `getHeaderLine($name)`, and now
+    returns a string or `null`.
+- `Psr\Http\Message\StreamInterface` now uses exceptions for reporting error
+  conditions instead of multiple return values.
+- `Psr\Http\Message\RequestInterface::withUri()` defines an additional, optional
+  parameter, `$preserveHost`; when `true`, the message MUST NOT change the value
+  of the `Host` header; when `false`, it MUST change the value to correspond
+  with the value in the URI.
+- `Psr\Http\Message\ServerRequestInterface` renames `getFileUploads()` to
+  `getUploadedFiles()`, and adds a mutator method, `withFileUploads()`. The
+  structure of this property MUST be a tree with each leaf an instance of a new
+  interface, `Psr\Http\Message\UploadedFileInterface`.
+
+Due to the above changes, a number of changes were made to phly/http.
+
+### Added
+
+- `Phly\Http\UploadedFile`, which is an implementation of
+  `Psr\Http\Message\UploadedFileInterface`, and provides metadata around an
+  uploaded file, as well as behavior for retrieving a
+  `Psr\Http\Http\StreamInterface`  representing the upload and for moving the
+  file to its target destination in an SAPI-agnostic way.
+- `Phly\Http\ServerRequestFactory::normalizeFiles()`, which will normalize an
+  array of files to a tree of `Phly\Http\UploadedFile` instances, including
+  normalization of upload file arrays.
+- `Phly\Http\ServerRequest::getUploadedFiles()`, for returning the normalized
+  uploaded files tree.
+- `Phly\Http\ServerRequest::withUploadedFiles()`, for returning a new instance
+  containing the uploaded files.
+- `Phly\Http\Uri::getHeaderLine($name)`, which returns the comma-concatenated
+  values for the given header.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- `Phly\Http\ServerRequest::getFileParams()`, which was replaced with the
+  `getUploadedFiles()` method.
+- `Phly\Http\Uri::getHeaderLines()`, which was renamed to `getHeaderLine()`,
+  with different behavior.
+
+### Fixed
+
+- `Phly\Http\Uri::withPath()` now defines and accepts the `$preserveHost`
+  argument, as outlined in this version's overview summary.
+- `Phly\Http\Uri::getHeader()` now returns an array of values associated with
+  the header; an empty array is returned if the header is not defined.
+- `Phly\Http\Stream` now raises `InvalidArgumentException` and
+  `RuntimeException` when unable to perform work, instead of overloading the
+  return value.
+
+## 0.11.3 - 2015-04-13
+
+### Added
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#52](https://github.com/phly/http/pull/52) Replace `self::` with `static::`
+  and `@return self` with `@return static` to allow for late static binding
+  with class extensions.
+- [#55](https://github.com/phly/http/pull/55) Updates `parseUri()` to validate
+  the scheme, ensuring the `Uri` instance cannot be instantiated with an
+  invalid scheme.
+- [#54](https://github.com/phly/http/pull/54) Internal restructuring to allow
+  serialization of a `Uri` instance.
+
+## 0.11.2 - 2015-03-30
+
+### Added
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#51](https://github.com/phly/http/pull/51) Ensure all `with*()` methods
+  return a **new** instance, as specified (and not `$this`, even when no change
+  is created).
+
 ## 0.11.1 - 2015-03-29
 
 ### Added

@@ -299,54 +299,115 @@ class RequestTest extends TestCase
     {
         $request = new Request('http://example.com');
         $header = $request->getHeader('host');
-        $this->assertEquals('example.com', $header);
+        $this->assertEquals(array('example.com'), $header);
     }
 
     /**
      * @group 39
      */
-    public function testGetHostHeaderReturnsNullIfNoUriPresent()
+    public function testGetHostHeaderReturnsEmptyArrayIfNoUriPresent()
     {
         $request = new Request();
-        $this->assertNull($request->getHeader('host'));
+        $this->assertSame([], $request->getHeader('host'));
     }
 
     /**
      * @group 39
      */
-    public function testGetHostHeaderReturnsNullIfUriDoesNotContainHost()
+    public function testGetHostHeaderReturnsEmptyArrayIfUriDoesNotContainHost()
     {
         $request = new Request(new Uri());
-        $this->assertNull($request->getHeader('host'));
+        $this->assertSame([], $request->getHeader('host'));
     }
 
     /**
      * @group 39
      */
-    public function testGetHostHeaderLinesReturnsUriHostWhenPresent()
+    public function testGetHostHeaderLineReturnsUriHostWhenPresent()
     {
         $request = new Request('http://example.com');
-        $header = $request->getHeaderLines('host');
+        $header = $request->getHeaderLine('host');
         $this->assertContains('example.com', $header);
     }
 
     /**
      * @group 39
      */
-    public function testGetHostHeaderLinesReturnsEmptyArrayIfNoUriPresent()
+    public function testGetHostHeaderLineReturnsNullIfNoUriPresent()
     {
         $request = new Request();
-        $header = $request->getHeaderLines('host');
-        $this->assertSame([], $header);
+        $this->assertNull($request->getHeaderLine('host'));
     }
 
     /**
      * @group 39
      */
-    public function testGetHostHeaderLinesReturnsEmptyArrayIfUriDoesNotContainHost()
+    public function testGetHostHeaderLineReturnsNullIfUriDoesNotContainHost()
     {
         $request = new Request(new Uri());
-        $header = $request->getHeaderLines('host');
-        $this->assertSame([], $header);
+        $this->assertNull($request->getHeaderLine('host'));
+    }
+
+    public function testPassingPreserveHostFlagWhenUpdatingUriDoesNotUpdateHostHeader()
+    {
+        $request = (new Request())
+            ->withAddedHeader('Host', 'example.com');
+
+        $uri = (new Uri())->withHost('www.example.com');
+        $new = $request->withUri($uri, true);
+
+        $this->assertEquals('example.com', $new->getHeaderLine('Host'));
+    }
+
+    public function testNotPassingPreserveHostFlagWhenUpdatingUriWithoutHostDoesNotUpdateHostHeader()
+    {
+        $request = (new Request())
+            ->withAddedHeader('Host', 'example.com');
+
+        $uri = new Uri();
+        $new = $request->withUri($uri);
+
+        $this->assertEquals('example.com', $new->getHeaderLine('Host'));
+    }
+
+    public function testHostHeaderUpdatesToUriHostAndPortWhenPreserveHostDisabledAndNonStandardPort()
+    {
+        $request = (new Request())
+            ->withAddedHeader('Host', 'example.com');
+
+        $uri = (new Uri())
+            ->withHost('www.example.com')
+            ->withPort(10081);
+        $new = $request->withUri($uri);
+
+        $this->assertEquals('www.example.com:10081', $new->getHeaderLine('Host'));
+    }
+
+    public function headersWithInjectionVectors()
+    {
+        return [
+            'name-with-cr'           => ["X-Foo\r-Bar", 'value'],
+            'name-with-lf'           => ["X-Foo\n-Bar", 'value'],
+            'name-with-crlf'         => ["X-Foo\r\n-Bar", 'value'],
+            'name-with-2crlf'        => ["X-Foo\r\n\r\n-Bar", 'value'],
+            'value-with-cr'          => ['X-Foo-Bar', "value\rinjection"],
+            'value-with-lf'          => ['X-Foo-Bar', "value\ninjection"],
+            'value-with-crlf'        => ['X-Foo-Bar', "value\r\ninjection"],
+            'value-with-2crlf'       => ['X-Foo-Bar', "value\r\n\r\ninjection"],
+            'array-value-with-cr'    => ['X-Foo-Bar', ["value\rinjection"]],
+            'array-value-with-lf'    => ['X-Foo-Bar', ["value\ninjection"]],
+            'array-value-with-crlf'  => ['X-Foo-Bar', ["value\r\ninjection"]],
+            'array-value-with-2crlf' => ['X-Foo-Bar', ["value\r\n\r\ninjection"]],
+        ];
+    }
+
+    /**
+     * @group ZF2015-04
+     * @dataProvider headersWithInjectionVectors
+     */
+    public function testConstructorRaisesExceptionForHeadersWithCRLFVectors($name, $value)
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        $request = new Request(null, null, 'php://memory', [$name =>  $value]);
     }
 }

@@ -11,8 +11,8 @@
 
 namespace Prophecy\Argument\Token;
 
-use SebastianBergmann\Comparator\Factory as ComparatorFactory;
 use SebastianBergmann\Comparator\ComparisonFailure;
+use Prophecy\Comparator\Factory as ComparatorFactory;
 use Prophecy\Util\StringUtil;
 
 /**
@@ -59,10 +59,12 @@ class ExactValueToken implements TokenInterface
             try {
                 $comparator->assertEquals($argument, $this->value);
                 return 10;
-            } catch (ComparisonFailure $failure) {}
+            } catch (ComparisonFailure $failure) {
+            	return false;
+			}
         }
 
-        // If either one is an object it should castable to a string
+        // If either one is an object it should be castable to a string
         if (is_object($argument) xor is_object($this->value)) {
             if (is_object($argument) && !method_exists($argument, '__toString')) {
                 return false;
