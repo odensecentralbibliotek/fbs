@@ -63,7 +63,7 @@ function fbs_debt_list($account,$include_nonpayable = true,$raw = false) {
       if (count($record_ids) == 1) {
         $entity = ding_entity_load(ding_provider_build_entity_id(reset($record_ids)));
         $data['display_name']  = t('@material_title (@material_number)', array(
-          '@material_title' => $entity->getTitle(),
+          '@material_title' => isset($entity) && $entity != false ? $entity->getTitle(): "could not load title",
           '@material_number' => $material->materialItemNumber,
         ));
       }
