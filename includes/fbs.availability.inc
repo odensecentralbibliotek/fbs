@@ -198,21 +198,7 @@ function fbs_availability_holdings($provider_ids) {
         $field652p = fbs_get_marc_field($entity, '652', 'p');
         $field654m = fbs_get_marc_field($entity, '654', 'm');
 
-        // Special handling for music:
-        // Field 039.a and 039.b is used for data about music shelf_mark, so we
-        // use this as an indicator for music materials.
-        if ($field039a = fbs_get_marc_field($entity, '039', 'a')) {
-          $suffix .= fbs_translate_marc($field039a, '039.a');
-
-          // We'll also append additional subfields if present.
-          if ($field039b = fbs_get_marc_field($entity, '039', 'b')) {
-            $suffix .= ' ' . fbs_translate_marc($field039b, '039.b');
-          }
-        }
-        // Use the 'sk' marker to determine if this is non-fiction.
-        // It seems to present in both the 'm' and 'o' subfield so we check them
-        // to be sure.
-        else if ($field652m != 'sk' && $field652o != 'sk') {
+        if ($field652m != 'sk' && $field652o != 'sk') {
           // DK5 classification.
             if($field652m != null)
             {
