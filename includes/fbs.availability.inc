@@ -42,7 +42,8 @@ function fbs_availability_items($provider_ids) {
  */
 function fbs_availability_holdings($provider_ids) {
   $holdings = array();
-
+  $excluded_branches_from_view = explode(PHP_EOL,variable_get('fbs_exclude_from_view', ''));
+  
   /*
    * Convert to katalog posts.
    * sometimes the library staff will disagress with national placements.
@@ -77,7 +78,8 @@ function fbs_availability_holdings($provider_ids) {
       'sublocation',
       'materials',
     );
-    foreach ($item->holdings as $item_holding) {
+    foreach ($item->holdings as $branch_index => $item_holding) {
+
       $result_holding = array(
         'available_count' => 0,
         'total_count' => 0,
@@ -337,6 +339,15 @@ function fbs_availability_holdings($provider_ids) {
         $result[$item->recordId]['reservable'] = true;
       }
       $result[$item->recordId]['holdings'][] = $result_holding;
+
+      // Exclude branch from availability
+      foreach($excluded_branches_from_view as $branch) {
+        if($item_holding->branch->branchId == $branch) {
+          unset($result[$item->recordId]['holdings'][$branch_index]);
+        } 
+      }
+
+
     }
 
     // Add issues in the right nesting.

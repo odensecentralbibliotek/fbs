@@ -270,6 +270,15 @@ function fbs_settings_form() {
         ),
         '#description' => t(''),
    );
+   $form['fbs']['fbs_exclude_from_view'] = array(
+    '#type' => 'textarea',
+    '#default_value' => variable_get('fbs_exclude_from_view', ''),
+    '#title' => t('exclude library branches from view'),
+    '#attributes' => array(
+        'placeholder' => t('eksempel: DK-746103 med 1 pr. linje'),
+    ),
+    '#description' => t(''),
+);
   return system_settings_form($form);
 }
 
