@@ -36,9 +36,10 @@ function fbs_debt_list($account, $reset = FALSE, $patron_id = NULL, $include_pai
       $res = array();
 
       try {
-        $patron_id = is_null($patron_id) ? fbs_patron_id($account) : $patron_id;
+        // Gets ERROR OC changes
+        //$patron_id = is_null($patron_id) ? fbs_patron_id($account) : $patron_id;
         $include_paid = FALSE === $include_paid ? 'false' : 'true';
-        $res = fbs_service()->Payment->getFees(fbs_service()->agencyId, $patron_id, $include_paid, 'true');
+        $res = fbs_service()->Payment->getFees(fbs_service()->agencyId, fbs_patron_id($account), $include_paid, 'true');
       }
       catch (Exception $e) {
         watchdog_exception('fbs', $e);
