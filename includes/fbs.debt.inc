@@ -59,7 +59,8 @@ function fbs_debt_list($account, $reset = FALSE, $patron_id = NULL, $include_pai
         // Since ding_entitye_load_multiple() returns array keyed by local tid, we
         // make e new array keyed by data well PiD.
         foreach (ding_entity_load_multiple(array_filter($ids)) as $key => $entity) {
-          $entities[$entity->reply->localId] = $entity;
+          $entity_id = explode(':', $entity->ding_entity_id);
+          $entities[$entity_id[1]] = $entity;
         }
       }
 
