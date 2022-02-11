@@ -54,7 +54,7 @@ function fbs_debt_list($account, $reset = FALSE, $patron_id = NULL, $include_pai
 
       // Translate record ids and preload entities.
       if ($ids) {
-        $ids = ding_provider_build_entity_id($ids);
+        //OC changes not needed - $ids = ding_provider_build_entity_id($ids);
         $entities = array();
         // Since ding_entitye_load_multiple() returns array keyed by local tid, we
         // make e new array keyed by data well PiD.
