@@ -183,8 +183,27 @@ function fbs_debt_payment_received($account, $debt_ids = array(), $order_id = NU
   foreach ($debt_ids as $debt_id) {
     $payment_order->feeIds[] = $debt_id;
   }
-
-  $patron_id = is_null($patron_id) ? fbs_patron_id($account) : $patron_id;
+  if (cache_get(session_name() . '-' . $account->uid, 'cache_ding_user_credentials')) {
+    $patron_id = is_null($patron_id) ? fbs_patron_id($account) : $patron_id;
+  } else {
+    $roles = array_values($GLOBALS['user']->roles);
+    // Log out user who are authenticated but has no other roles (i.e. ding user)
+    if (user_is_logged_in() && sizeof($roles) == 1 && $roles[0] == 'authenticated user') {
+      user_module_invoke('logout', $account, 'user');
+      session_destroy();
+      $GLOBALS['user'] = drupal_anonymous_user();
+      watchdog('ding_debt_easy', 'The payment callback has been called with a session timeout/logout. Order (%order_id). The order have feeIds: %feeIds', [
+        '%order_id' => $payment_order->orderId,
+        '%feeIds' => $payment_order->feeIds,
+      ], WATCHDOG_CRITICAL);
+      drupal_set_message(t('Du har været inaktiv i lang tid og er derfor blevet loggede ud af sikkerhedshensyn, venligst kontakt bibliotekets regningsafdeling med ordrenummer: %order_id da din betaling ikke er korrekt registreret', [
+        '%order_id' => $payment_order->orderId,
+      ]), 'error');
+      _ding_debt_easy_update_status_local($payment_order->orderId, DING_DEBT_EASY_STATUS_FAILED);
+      _ding_debt_easy_remove_personal_info($payment_order->orderId);
+      drupal_goto(DING_DEBT_USER_DEBT_PAGE);
+    }
+  }
 
   try {
     $res = fbs_service()->Payment->payFees(fbs_service()->agencyId, $patron_id, $payment_order);
