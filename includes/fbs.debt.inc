@@ -200,7 +200,6 @@ function fbs_debt_payment_received($account, $debt_ids = array(), $order_id = NU
         '%order_id' => $payment_order->orderId,
       ]), 'error');
       _ding_debt_easy_update_status_local($payment_order->orderId, DING_DEBT_EASY_STATUS_FAILED);
-      _ding_debt_easy_remove_personal_info($payment_order->orderId);
       drupal_goto(DING_DEBT_USER_DEBT_PAGE);
     }
   }
