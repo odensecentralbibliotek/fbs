@@ -338,10 +338,6 @@ class CurlFactory implements CurlFactoryInterface
     private function applyHandlerOptions(EasyHandle $easy, array &$conf)
     {
         $options = $easy->options;
-        //Materiallist ssl error fix
-        //if($conf['_headers']['Host'][0] == "prod.materiallist.dandigbib.org") {
-        //$options['verify'] = false;
-        //}
         if (isset($options['verify'])) {
             if ($options['verify'] === false) {
                 unset($conf[CURLOPT_CAINFO]);
