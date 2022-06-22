@@ -5,7 +5,7 @@
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '859ef3c6d0c9fbd532556dfb90c434cc58e71823',
+        'reference' => '0ec3495227373b6146b90b14448c751fe9e19a55',
         'name' => '__root__',
         'dev' => true,
     ),
@@ -16,7 +16,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '859ef3c6d0c9fbd532556dfb90c434cc58e71823',
+            'reference' => '0ec3495227373b6146b90b14448c751fe9e19a55',
             'dev_requirement' => false,
         ),
         'doctrine/instantiator' => array(
@@ -38,12 +38,12 @@
             'dev_requirement' => true,
         ),
         'guzzlehttp/guzzle' => array(
-            'pretty_version' => '6.5.7',
-            'version' => '6.5.7.0',
+            'pretty_version' => '6.5.8',
+            'version' => '6.5.8.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../guzzlehttp/guzzle',
             'aliases' => array(),
-            'reference' => '724562fa861e21a4071c652c8a159934e4f05592',
+            'reference' => 'a52f0440530b54fa079ce76e8c5d196a42cad981',
             'dev_requirement' => false,
         ),
         'guzzlehttp/promises' => array(
@@ -56,12 +56,12 @@
             'dev_requirement' => false,
         ),
         'guzzlehttp/psr7' => array(
-            'pretty_version' => '1.8.5',
-            'version' => '1.8.5.0',
+            'pretty_version' => '1.9.0',
+            'version' => '1.9.0.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../guzzlehttp/psr7',
             'aliases' => array(),
-            'reference' => '337e3ad8e5716c15f9657bd214d16cc5e69df268',
+            'reference' => 'e98e3e6d4f86621a9b75f623996e6bbdeb4b9318',
             'dev_requirement' => false,
         ),
         'netresearch/jsonmapper' => array(
@@ -202,8 +202,8 @@
         'psr/http-message-implementation' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '1.0',
-                1 => '~1.0.0',
+                0 => '~1.0.0',
+                1 => '1.0',
             ),
         ),
         'psr/log' => array(
