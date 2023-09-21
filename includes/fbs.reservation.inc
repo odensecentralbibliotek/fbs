@@ -45,6 +45,7 @@ function fbs_reservation_list($account, $requested_type = NULL,$raw = false) {
       'expiry' => $reservation->expiryDate,
       // Required by ding_reservation.
       'reservation_type' => $type,
+      'remote_loan' => $reservation->loanType == 'interLibraryLoan',
     );
 
     if ($type === 'DING_RESERVATION_READY') {

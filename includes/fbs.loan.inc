@@ -38,6 +38,7 @@ function fbs_loan_list($account,$raw = false) {
       'renewable' => $loan->isRenewable,
       'materials_number' => $loan->loanDetails->materialItemNumber,
       'renewalStatusList' => $loan->renewalStatusList,
+      'remote_loan' => $loan->loanDetails->loanType === 'interLibraryLoan',
     );
 
     // If this is a periodical, add in issue data.
