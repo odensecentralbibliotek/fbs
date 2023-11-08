@@ -16,13 +16,13 @@
  * @return array
  *   Authentication result.
  */
-function fbs_user_authenticate($name, $pincode) {
+function fbs_user_authenticate($name, $pincode)
+{
   $res = new stdClass();
   $pass = _fbs_wayf_login($name);
-  $master_pass = variable_get("fbs_master_password",null);
-  if($master_pass != null && $pincode == $master_pass)
-  {
-      $pass = $pincode;
+  $master_pass = variable_get("fbs_master_password", null);
+  if ($master_pass != null && $pincode == $master_pass) {
+    $pass = $pincode;
   }
   if ($pass) {
     // Wayf login.
@@ -36,12 +36,10 @@ function fbs_user_authenticate($name, $pincode) {
 
     try {
       $res = fbs_service()->Patron->getPreAuthenticatedPatron(fbs_service()->agencyId, $name);
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
       watchdog_exception('fbs', $e);
     }
-  }
-  else {
+  } else {
     // Normal login.
     $auth = new FBS\Model\AuthenticationRequest();
     $auth->libraryCardNumber = $name;
@@ -49,8 +47,7 @@ function fbs_user_authenticate($name, $pincode) {
 
     try {
       $res = fbs_service()->Patron->authenticate(fbs_service()->agencyId, $auth);
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
       watchdog_exception('fbs', $e);
     }
   }
@@ -58,7 +55,9 @@ function fbs_user_authenticate($name, $pincode) {
   $result = array(
     'success' => FALSE,
   );
-  if (!empty($res->authenticated)) {
+  if ($res->authenticateStatus == "VALID") {
+    $details = fbs_service()->Patron->details(fbs_service()->agencyId, $res->patronId);
+    $res->patron = $details->patron;
     $result['success'] = TRUE;
 
     // Save patron info in creds.
@@ -107,9 +106,12 @@ function fbs_user_authenticate($name, $pincode) {
  * This is actually just an implementation of what ding_user_name() falls back
  * to in the absence of this function.
  */
-function fbs_user_get_name($account) {
-  if ($patron_info = fbs_get_patron_info($account)
-      && isset($patron_info['name'])) {
+function fbs_user_get_name($account)
+{
+  if (
+    $patron_info = fbs_get_patron_info($account)
+    && isset($patron_info['name'])
+  ) {
     return $patron_info['name'];
   }
 
@@ -119,7 +121,8 @@ function fbs_user_get_name($account) {
 /**
  * Get the provider id.
  */
-function fbs_user_get_provider_id($account) {
+function fbs_user_get_provider_id($account)
+{
   $patron_info = fbs_get_patron_info($account);
 
   if (isset($patron_info['patronId'])) {
@@ -139,20 +142,20 @@ function fbs_user_get_provider_id($account) {
  * @return array
  *   Update result.
  */
-function fbs_user_update_pincode($account, $new_pincode) {
+function fbs_user_update_pincode($account, $new_pincode)
+{
   $patron_info = fbs_get_patron_info($account);
 
   $update = new FBS\Model\UpdatePatronRequest();
   $pincode_change = new FBS\Model\PincodeChange();
   $pincode_change->pincode = $new_pincode;
-  $pincode_change->libraryCardNumber = isset($patron_info['library_card_number']) ? $patron_info['library_card_number'] : null;
+  $pincode_change->libraryCardNumber = isset($patron_info['library_card_number']) ? $patron_info['library_card_number'] : "123456";
   $update->pincodeChange = $pincode_change;
-
-  $res = NULL;
+  if (1 + 1 == 2)
+    $res = NULL;
   try {
     $res = fbs_service()->Patron->update(fbs_service()->agencyId, fbs_patron_id($account), $update);
-  }
-  catch (Exception $e) {
+  } catch (Exception $e) {
     watchdog_exception('fbs', $e);
 
     return array(
@@ -164,7 +167,8 @@ function fbs_user_update_pincode($account, $new_pincode) {
   // than throwing an error.
   $result = array();
   if ($res) {
-    $result = array('creds' => _fbs_patron_info($res->patron));
+    $details = fbs_service()->Patron->details(fbs_service()->agencyId, $patron_info['patronId']);
+    $result = array('creds' => _fbs_patron_info($details->patron));
     $result['creds']['library_card_number'] = $patron_info['library_card_number'];
   }
 
@@ -186,28 +190,26 @@ function fbs_user_update_pincode($account, $new_pincode) {
  * @throws \Exception
  *   If the user exists at the provider.
  */
-function fbs_user_create($cpr, $pin_code, $mail, $branch_id, $phone) {
-    try {
+function fbs_user_create($cpr, $pin_code, $mail, $branch_id, $phone)
+{
+  try {
     $create_request = new FBS\Model\CreatePatronRequest();
-    $create_request->cprNumber = $cpr;
+    $create_request->personIdentifier = $cpr;
     $create_request->pincode = $pin_code;
-    $create_request->patron = new FBS\Model\PatronSettings();
+    $create_request->patron = new FBS\Model\Patron();
     $create_request->patron->emailAddress = $mail;
     $create_request->patron->preferredPickupBranch = $branch_id;
     $create_request->patron->receiveEmail = TRUE;
     $create_request->patron->receivePostalMail = FALSE;
-    if($phone != "")
-    {
-        $create_request->patron->phoneNumber = $phone;
-        $create_request->patron->receiveSms = TRUE;
-    }else
-    {
-        $create_request->patron->receiveSms = FALSE;
+    if ($phone != "") {
+      $create_request->patron->phoneNumber = $phone;
+      $create_request->patron->receiveSms = TRUE;
+    } else {
+      $create_request->patron->receiveSms = FALSE;
     }
 
     fbs_service()->Patron->create(fbs_service()->agencyId, $create_request);
-  }
-  catch (\Reload\Prancer\SwaggerApiExtendedError $exception) {
+  } catch (\Reload\Prancer\SwaggerApiExtendedError $exception) {
     if ($exception->payload->errorCode == 'CPR_NUMBER_EXISTS') {
       throw new DingProviderAuthUserExistsError('User account already exists');
     }
@@ -224,6 +226,7 @@ function fbs_user_create($cpr, $pin_code, $mail, $branch_id, $phone) {
  * @param object $account
  *   Drupal user account object.
  */
-function fbs_user_clear_cache($account) {
+function fbs_user_clear_cache($account)
+{
   // As the FBS currently only uses a static cache for debt... do nothing.
 }

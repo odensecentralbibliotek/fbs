@@ -6,14 +6,19 @@ class PatronSettings
 {
 
     /**
-     * @var string Required if patron should receive email notifications
+     * @var string Language in which the patron prefers the communication with the library to take place If left empty default library language will be used.
      */
-    public $emailAddress = null;
+    public $preferredLanguage = null;
 
     /**
-     * @var string Required if patron should receive SMS notifications
+     * @var array Notification protocols that the patron want to receive notification on. SMS and EMAIL are not included.
      */
-    public $phoneNumber = null;
+    public $notificationProtocols = null;
+
+    /**
+     * @var EmailAddresses Existing email addresses are overwritten with these values If left empty existing email addresses are deleted.
+     */
+    public $emailAddresses = null;
 
     /**
      * @var string ISIL-number of preferred pickup branch
@@ -27,23 +32,26 @@ class PatronSettings
     public $onHold = null;
 
     /**
-     * @var boolean 
+     * @var boolean
      * @required
      */
-    public $receiveEmail = null;
+    public $guardianVisibility = null;
 
     /**
-     * @var boolean 
+     * @var boolean
      * @required
      */
     public $receivePostalMail = null;
 
     /**
-     * @var boolean 
-     * @required
+     * @var array A list of interests of the patron.
      */
-    public $receiveSms = null;
+    public $interests = null;
 
+    /**
+     * @var PhoneNumber Required if patron should receive SMS notifications
+     */
+    public $phoneNumbers = null;
 
 }
 

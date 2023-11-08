@@ -9,7 +9,7 @@ class CreatePatronRequest
      * @var string 
      * @required
      */
-    public $cprNumber = null;
+    public $personIdentifier = null;
 
     /**
      * @var string 

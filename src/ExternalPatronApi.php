@@ -8,6 +8,21 @@ use FBS\Model;
 class ExternalPatronApi extends SwaggerApi
 {
 
+    /* Get patron details */
+    public function details($agencyid, $patronid)
+    {
+        $request = $this->newRequest("GET", "/external/{agencyid}/patrons/{patronid}/v4");
+        $request->addParameter("path", "agencyid", $agencyid);
+        $request->addParameter("path", "patronid", $patronid);
+
+        $request->defineResponse(200, "", '\\FBS\\Model\\DetailsPatron');
+        $request->defineResponse("400", 'bad request', '\\FBS\\Model\\RestException');
+        $request->defineResponse("401", 'client unauthorized', null);
+
+        return $request->execute();
+    }
+
+
     /**
      * Create a new patron.
      *
@@ -36,7 +51,7 @@ class ExternalPatronApi extends SwaggerApi
      */
     public function create($agencyid, Model\CreatePatronRequest $createPatronRequest)
     {
-        $request = $this->newRequest("POST", "/external/v1/{agencyid}/patrons");
+        $request = $this->newRequest("POST", "/external/{agencyid}/patrons/v9");
         $request->addParameter("path", "agencyid", $agencyid);
         $request->addParameter("body", "createPatronRequest", $createPatronRequest);
 
@@ -71,7 +86,7 @@ class ExternalPatronApi extends SwaggerApi
      */
     public function authenticate($agencyid, Model\AuthenticationRequest $authenticationRequest)
     {
-        $request = $this->newRequest("POST", "/external/v2/{agencyid}/patrons/authenticate");
+        $request = $this->newRequest("POST", "/external/{agencyid}/patrons/authenticate/v9");
         $request->addParameter("path", "agencyid", $agencyid);
         $request->addParameter("body", "authenticationRequest", $authenticationRequest);
 
@@ -106,7 +121,7 @@ class ExternalPatronApi extends SwaggerApi
      */
     public function getPreAuthenticatedPatron($agencyid, $cprNumber)
     {
-        $request = $this->newRequest("POST", "/external/v1/{agencyid}/patrons/preauthenticated");
+        $request = $this->newRequest("POST", "/external/{agencyid}/patrons/preauthenticated/v10");
         $request->addParameter("path", "agencyid", $agencyid);
         $request->addParameter("body", "cprNumber", $cprNumber);
 
@@ -141,7 +156,7 @@ class ExternalPatronApi extends SwaggerApi
      */
     public function getPreAuthenticatedPatronFromUNIClogin($agencyid, $unicUsername)
     {
-        $request = $this->newRequest("POST", "/external/v1/{agencyid}/patrons/preauthenticated/unic");
+        $request = $this->newRequest("POST", "/external/{agencyid}/patrons/preauthenticated/unic/v6");
         $request->addParameter("path", "agencyid", $agencyid);
         $request->addParameter("body", "unicUsername", $unicUsername);
 
@@ -178,12 +193,12 @@ class ExternalPatronApi extends SwaggerApi
      */
     public function update($agencyid, $patronid, Model\UpdatePatronRequest $updatePatron)
     {
-        $request = $this->newRequest("PUT", "/external/v1/{agencyid}/patrons/{patronid}");
+        $request = $this->newRequest("PUT", "/external/{agencyid}/patrons/{patronid}/v8");
         $request->addParameter("path", "agencyid", $agencyid);
         $request->addParameter("path", "patronid", $patronid);
         $request->addParameter("body", "updatePatron", $updatePatron);
 
-        $request->defineResponse(200, "", '\\FBS\\Model\\AuthenticatedPatron');
+        $request->defineResponse(204, "Update OK");
         $request->defineResponse("400", 'bad request', '\\FBS\\Model\\RestException');
         $request->defineResponse("401", 'client unauthorized', null);
         $request->defineResponse("404", 'patron not found', null);
