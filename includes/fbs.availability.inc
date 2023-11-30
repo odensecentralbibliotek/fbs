@@ -85,6 +85,8 @@ function fbs_availability_holdings($provider_ids) {
         'total_count' => 0,
         // We have no idea about this either.
         'reference_count' => 0,
+        // 'materials' added for use with IMS availability module
+        'materials' => array(),
         'placement' => array(),
       );
 
@@ -128,7 +130,7 @@ function fbs_availability_holdings($provider_ids) {
           }
           
       }
-      //check if it is in a non home department
+      // check if it is in a non home department
       $non_home_departments = explode(PHP_EOL,variable_get('fbs_nonhome_departments', ''));
       if(isset($item_holding->department) && in_array($item_holding->department->title,$non_home_departments))
       {
@@ -144,6 +146,12 @@ function fbs_availability_holdings($provider_ids) {
           {
               $material->available = 0;
           }
+          // add in the extra materials info available from later versions of the FBS api
+          // which is necessary for using the IMS availability module 
+          $result_holding['materials'][$index]['material_id'] = $material->itemNumber;
+          $result_holding['materials'][$index]['periodical'] = $material->periodical;
+          $result_holding['materials'][$index]['available'] = $material->available;
+          $result_holding['materials'][$index]['materialGroupName'] = $material->materialGroupName;
       }
       unset($material);
       // Add material description.
