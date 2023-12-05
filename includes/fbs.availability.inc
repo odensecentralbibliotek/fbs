@@ -13,13 +13,13 @@
  * @return array
  *   Avaliability info.
  */
-function fbs_availability_items($provider_ids) {
+function fbs_availability_items($provider_ids)
+{
   $avails = array();
 
   try {
     $avails = fbs_service()->Catalog->getAvailability(fbs_service()->agencyId, $provider_ids);
-  }
-  catch (Exception $e) {
+  } catch (Exception $e) {
     watchdog_exception('fbs', $e);
   }
 
@@ -40,22 +40,21 @@ function fbs_availability_items($provider_ids) {
  * @return array
  *   Holdings info.
  */
-function fbs_availability_holdings($provider_ids) {
+function fbs_availability_holdings($provider_ids)
+{
   $holdings = array();
-  $excluded_branches_from_view = explode(PHP_EOL,variable_get('fbs_exclude_from_view', ''));
-  
+  $excluded_branches_from_view = explode(PHP_EOL, variable_get('fbs_exclude_from_view', ''));
+
   /*
    * Convert to katalog posts.
    * sometimes the library staff will disagress with national placements.
    */
-  
+
   try {
     $holdings = fbs_service()->Catalog->getHoldings(fbs_service()->agencyId, $provider_ids);
-  }
-  catch (Exception $e) {
+  } catch (Exception $e) {
     watchdog_exception('fbs', $e);
   }
-
   $result = array();
   $tmp_issues = array();
   foreach ($holdings as $holdings_index => $item) {
@@ -97,61 +96,52 @@ function fbs_availability_holdings($provider_ids) {
         }
       }
 
-      $non_home_locations = explode(PHP_EOL,variable_get('fbs_nonreserveable_locations', ''));
-             foreach ($result_holding['placement'] as $part) {
-                foreach($non_home_locations as $non_home)
-                {
-                    if(!strcmp(trim($part),trim($non_home)))
-                    {
-                        for($i = 0; $i < sizeof($item_holding->materials);$i++)
-                        {
-                            //$item_holding->materials[$i]->available = FALSE;
-                            $item_holding->materials[$i]->reserveable = FALSE;
-                            
-                        }
-                    }
-                }
+      $non_home_locations = explode(PHP_EOL, variable_get('fbs_nonreserveable_locations', ''));
+      foreach ($result_holding['placement'] as $part) {
+        foreach ($non_home_locations as $non_home) {
+          if (!strcmp(trim($part), trim($non_home))) {
+            for ($i = 0; $i < sizeof($item_holding->materials); $i++) {
+              //$item_holding->materials[$i]->available = FALSE;
+              $item_holding->materials[$i]->reserveable = FALSE;
+
+            }
           }
+        }
+      }
 
       //check if it is in a non home location
-      $non_home_locations = explode(PHP_EOL,variable_get('fbs_nonhome_locations', ''));
-      foreach ($result_holding['placement']as $part) {
-          foreach($non_home_locations as $non_home)
-          {
-              if(!strcmp(trim($part),trim($non_home)))
-              {
-                for($i = 0; $i < sizeof($item_holding->materials);$i++)
-                {
-                    $item_holding->materials[$i]->available = FALSE;
-                    
-                }
-                break;
-              }
+      $non_home_locations = explode(PHP_EOL, variable_get('fbs_nonhome_locations', ''));
+      foreach ($result_holding['placement'] as $part) {
+        foreach ($non_home_locations as $non_home) {
+          if (!strcmp(trim($part), trim($non_home))) {
+            for ($i = 0; $i < sizeof($item_holding->materials); $i++) {
+              $item_holding->materials[$i]->available = FALSE;
+
+            }
+            break;
           }
-          
+        }
+
       }
       // check if it is in a non home department
-      $non_home_departments = explode(PHP_EOL,variable_get('fbs_nonhome_departments', ''));
-      if(isset($item_holding->department) && in_array($item_holding->department->title,$non_home_departments))
-      {
+      $non_home_departments = explode(PHP_EOL, variable_get('fbs_nonhome_departments', ''));
+      if (isset($item_holding->department) && in_array($item_holding->department->title, $non_home_departments)) {
         $item_holding->materials[0]->available = 0;
       }
       /*
        * we have to loop all materials , else it does not work for periodika.
        */
-      $non_home_material_group = explode(PHP_EOL,variable_get('fbs_nonhome_material_groups', ''));
-      foreach($item_holding->materials as $index => &$material)
-      {
-          if(in_array($material->materialGroupName,$non_home_material_group))
-          {
-              $material->available = 0;
-          }
-          // add in the extra materials info available from later versions of the FBS api
-          // which is necessary for using the IMS availability module 
-          $result_holding['materials'][$index]['material_id'] = $material->itemNumber;
-          $result_holding['materials'][$index]['periodical'] = $material->periodical;
-          $result_holding['materials'][$index]['available'] = $material->available;
-          $result_holding['materials'][$index]['materialGroupName'] = $material->materialGroupName;
+      $non_home_material_group = explode(PHP_EOL, variable_get('fbs_nonhome_material_groups', ''));
+      foreach ($item_holding->materials as $index => &$material) {
+        if (in_array($material->materialGroup->name, $non_home_material_group)) {
+          $material->available = 0;
+        }
+        // add in the extra materials info available from later versions of the FBS api
+        // which is necessary for using the IMS availability module 
+        $result_holding['materials'][$index]['material_id'] = $material->itemNumber;
+        $result_holding['materials'][$index]['periodical'] = $material->periodical;
+        $result_holding['materials'][$index]['available'] = $material->available;
+        $result_holding['materials'][$index]['materialGroupName'] = $material->materialGroup->name;
       }
       unset($material);
       // Add material description.
@@ -159,48 +149,42 @@ function fbs_availability_holdings($provider_ids) {
       if (variable_get('fbs_show_material_group', 0) && $material_description[0]) {
         $result_holding['placement'][] = $material_description[0]->materialGroupName;
       }
-      if(!in_array($item->recordId,$provider_ids))
-      {
-          continue;
+      if (!in_array($item->recordId, $provider_ids)) {
+        continue;
       }
-     
+
       $suffix_type = 'simple';
-      if(isset($_POST['suffix_type_simplify']) && $_POST['suffix_type_simplify'])
-      {
-        
+      if (isset($_POST['suffix_type_simplify']) && $_POST['suffix_type_simplify']) {
+
+      } else {
+        $suffix_type = variable_get('fbs_holdings_suffix_type', 'simple');
       }
-      else
-      {
-          $suffix_type = variable_get('fbs_holdings_suffix_type', 'simple');
-      }
- 
+
       /*
        * Dont use the slower shelf_mark on the search pages...
        * we use HTTP_REFERER because it is an ajax call.
        */
       if ($suffix_type == 'simple' || (isset($_SESSION["inspiration_marcx_disable"]) && $_SESSION["inspiration_marcx_disable"])) {
         // Load entity by the provider id.
-        
+
         $entity_id = $item->recordId; // we need to know the well id ?!
         $entity = ding_entity_load($entity_id);
         /* sometimes it fails to load the entity ? */
-        if(isset($entity) && is_object($entity))
-        {
-            // Get DK5 classification.
-            if ($classification = $entity->getClassification()) {
-              $result_holding['placement'][] = $classification;
-            }
+        if (isset($entity) && is_object($entity)) {
+          // Get DK5 classification.
+          if ($classification = $entity->getClassification()) {
+            $result_holding['placement'][] = $classification;
+          }
 
-            // Get inverted author.
-            if ($creator = $entity->getInvertedCreators()) {
-              $result_holding['placement'][] = $creator[0];
-            }
+          // Get inverted author.
+          if ($creator = $entity->getInvertedCreators()) {
+            $result_holding['placement'][] = $creator[0];
+          }
         }
-      }
-      elseif ($suffix_type == 'shelf_mark') {
+      } elseif ($suffix_type == 'shelf_mark') {
         module_load_include('client.inc', 'ting');
-        
-        $entity_id = variable_get('ting_agency', FALSE) . "-katalog:". $item->recordId;
+
+        $entity_id = variable_get('ting_agency', FALSE) . "-katalog:" . $item->recordId;
         $entity = ting_get_object_marcxchange($entity_id);
         $suffix = '';
         $field652m = fbs_get_marc_field($entity, '652', 'm');
@@ -210,46 +194,42 @@ function fbs_availability_holdings($provider_ids) {
 
         if ($field652m != 'sk' && $field652o != 'sk') {
           // DK5 classification.
-            if($field652m != null)
-            {
-                $suffix .= $field652m;
-            }
-            else if($field652o != null) 
-            {
-                $suffix .= $field652o;
-            }
-            else {
-                $suffix .= $field654m;
-            }
-            // Additonal descriptors from the DK5 classification.
-            if ($field652b = fbs_get_marc_field($entity, '652', 'b')) {
-              $suffix .= ' ' . $field652b;
-            }
-            if($field652m == "99.4"){
-                
-            if ($field652a = fbs_get_marc_field($entity, '652', 'a')) {
-                $suffix .= ' ' . $field652a;
-                if ($field652h = fbs_get_marc_field($entity, '652', 'h')) {
-                  $suffix .= ', ' . $field652h;
-                }
-              }
-            }
+          if ($field652m != null) {
+            $suffix .= $field652m;
+          } else if ($field652o != null) {
+            $suffix .= $field652o;
+          } else {
+            $suffix .= $field654m;
+          }
+          // Additonal descriptors from the DK5 classification.
+          if ($field652b = fbs_get_marc_field($entity, '652', 'b')) {
+            $suffix .= ' ' . $field652b;
+          }
+          if ($field652m == "99.4") {
 
-            // Additonal descriptors from the old DK5 classification.
-            if($field652m === null) {
-              if ($field654b = fbs_get_marc_field($entity, '654', 'b')) {
-                $suffix .= ' ' . $field654b;
+            if ($field652a = fbs_get_marc_field($entity, '652', 'a')) {
+              $suffix .= ' ' . $field652a;
+              if ($field652h = fbs_get_marc_field($entity, '652', 'h')) {
+                $suffix .= ', ' . $field652h;
               }
-              if($field654m == "99.4"){
-                if ($field654a = fbs_get_marc_field($entity, '654', 'a')) {
-                  $suffix .= ' ' . $field654a;
-                  if ($field654h = fbs_get_marc_field($entity, '654', 'h')) {
-                    $suffix .= ', ' . $field654h;
-                  }
+            }
+          }
+
+          // Additonal descriptors from the old DK5 classification.
+          if ($field652m === null) {
+            if ($field654b = fbs_get_marc_field($entity, '654', 'b')) {
+              $suffix .= ' ' . $field654b;
+            }
+            if ($field654m == "99.4") {
+              if ($field654a = fbs_get_marc_field($entity, '654', 'a')) {
+                $suffix .= ' ' . $field654a;
+                if ($field654h = fbs_get_marc_field($entity, '654', 'h')) {
+                  $suffix .= ', ' . $field654h;
                 }
               }
             }
-      
+          }
+
         }
 
         // Generate and append the standard suffix for ALMA shelf_mark. We prefer
@@ -265,13 +245,11 @@ function fbs_availability_holdings($provider_ids) {
           // If we found a shelf_mark and there's already something in suffix,
           // remember to add a seperator.
           if ($suffix) {
-              if($field652m != "99.4" && $field652p != "99.4"){
-            $suffix .= ' > ';
-              }
-              else
-              {
-                  $suffix .= " ";
-              }
+            if ($field652m != "99.4" && $field652p != "99.4") {
+              $suffix .= ' > ';
+            } else {
+              $suffix .= " ";
+            }
           }
 
           $words = explode(' ', $shelf_mark);
@@ -287,7 +265,7 @@ function fbs_availability_holdings($provider_ids) {
 
           // If no special mark; use the first word.
           if (!$shelf_mark) {
-            $shelf_mark = implode(' ',$words);
+            $shelf_mark = implode(' ', $words);
           }
 
           // A neat little trick for mb_ucfirst:
@@ -310,24 +288,22 @@ function fbs_availability_holdings($provider_ids) {
           $result_holding['available_count']++;
           $result[$item->recordId]['available'] = TRUE;
         }
-        if(!isset($mat->reserveable) || $mat->reserveable == true)
-        {
+        if (!isset($mat->reserveable) || $mat->reserveable == true) {
           $reserable_materials_count++;
         }
 
         if ($mat->periodical) {
           // Add to issues.
           $key = (!empty($mat->periodical->volumeYear) ?
-                  $mat->periodical->volumeYear : '') . ':' .
-               $mat->periodical->volume . ':' .
-               (!empty($mat->periodical->volumeNumber) ?
-               $mat->periodical->volumeNumber : '') . ':' .
-               $placement_string;
+            $mat->periodical->volumeYear : '') . ':' .
+            $mat->periodical->volume . ':' .
+            (!empty($mat->periodical->volumeNumber) ?
+              $mat->periodical->volumeNumber : '') . ':' .
+            $placement_string;
           if (isset($tmp_issues[$key])) {
             $tmp_issues[$key]['available'] += $mat->available ? 1 : 0;
             $tmp_issues[$key]['total'] += 1;
-          }
-          else {
+          } else {
             $tmp_issues[$key] = array(
               'vol' => $mat->periodical->volume . (!empty($mat->periodical->volumeNumber) ? '-' . $mat->periodical->volumeNumber : ''),
               'year' => $mat->periodical->volumeYear,
@@ -339,20 +315,18 @@ function fbs_availability_holdings($provider_ids) {
           }
         }
       }
-      if($reserable_materials_count == 0)
-      {
+      if ($reserable_materials_count == 0) {
         $result[$item->recordId]['reservable'] = false;
-      }
-      else{
+      } else {
         $result[$item->recordId]['reservable'] = true;
       }
       $result[$item->recordId]['holdings'][] = $result_holding;
 
       // Exclude branch from availability
-      foreach($excluded_branches_from_view as $branch) {
-        if($item_holding->branch->branchId == $branch) {
+      foreach ($excluded_branches_from_view as $branch) {
+        if ($item_holding->branch->branchId == $branch) {
           unset($result[$item->recordId]['holdings'][$branch_index]);
-        } 
+        }
       }
 
 
@@ -396,10 +370,10 @@ function fbs_availability_holdings($provider_ids) {
 /**
  *  Helper to get the value of the specified marc field.
  */
-function fbs_get_marc_field($entity, $field, $subfield = NULL) {
-  if(!is_object($entity))
-  {
-      return null;
+function fbs_get_marc_field($entity, $field, $subfield = NULL)
+{
+  if (!is_object($entity)) {
+    return null;
   }
   $value = $entity->getValue($field, $subfield);
 
@@ -414,7 +388,8 @@ function fbs_get_marc_field($entity, $field, $subfield = NULL) {
 /**
  * Helper function to pick marc subfield from a range of candidates.
  */
-function fbs_pick_marc_field($entity, array $candidates) {
+function fbs_pick_marc_field($entity, array $candidates)
+{
   foreach ($candidates as $candidate) {
     list($field, $subfield) = explode('.', $candidate);
 
@@ -428,13 +403,13 @@ function fbs_pick_marc_field($entity, array $candidates) {
 /**
  * Tranlate a marc string code to a human readable label.
  */
-function fbs_translate_marc($code, $field) {
+function fbs_translate_marc($code, $field)
+{
   $translations = _fbs_get_marc_039a_translations();
 
   if ($field == '039.a') {
     $translations = _fbs_get_marc_039a_translations();
-  }
-  else if ($field == '039.b') {
+  } else if ($field == '039.b') {
     $translations = _fbs_get_marc_039b_translations();
   }
 
@@ -446,8 +421,9 @@ function fbs_translate_marc($code, $field) {
  *
  * See: http://www.kat-format.dk/danMARC2/Danmarc2.22.htm#pgfId=1574621
  */
-function _fbs_get_marc_039a_translations() {
-  return array (
+function _fbs_get_marc_039a_translations()
+{
+  return array(
     'sam' => 'SAMLINGER',
     'mir' => 'MIDDELALDER/RENÆSSANCE',
     'mia' => 'MIDDELALDER/RENÆSSANCE. ANTOLOGIER',
@@ -490,7 +466,8 @@ function _fbs_get_marc_039a_translations() {
  *
  * See: http://www.kat-format.dk/danMARC2/Danmarc2.22.htm#pgfId=1574621
  */
-function _fbs_get_marc_039b_translations() {
+function _fbs_get_marc_039b_translations()
+{
   return array(
     'ad' => 'Andorra',
     'ae' => 'Forenede Arabiske Emirater',

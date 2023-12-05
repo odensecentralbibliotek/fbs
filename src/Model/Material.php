@@ -23,10 +23,10 @@ class Material
     public $available = null;
 
     /**
-     * @var string Name of the material group that the material belongs to
+     * @var MaterialGroup Name og description of the material group that the material belongs to
      * @required
      */
-    public $materialGroupName = null;
+    public $materialGroup = null;
 
 
 }
