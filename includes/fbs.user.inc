@@ -197,15 +197,17 @@ function fbs_user_create($cpr, $pin_code, $mail, $branch_id, $phone)
     $create_request->personIdentifier = $cpr;
     $create_request->pincode = $pin_code;
     $create_request->patron = new FBS\Model\Patron();
-    $create_request->patron->emailAddress = $mail;
     $create_request->patron->preferredPickupBranch = $branch_id;
-    $create_request->patron->receiveEmail = TRUE;
     $create_request->patron->receivePostalMail = FALSE;
     if ($phone != "") {
-      $create_request->patron->phoneNumber = $phone;
-      $create_request->patron->receiveSms = TRUE;
-    } else {
-      $create_request->patron->receiveSms = FALSE;
+      $create_request->patron->phoneNumbers = new FBS\Model\PhoneNumber();
+      $create_request->patron->phoneNumbers->receiveNotification = TRUE;
+      $create_request->patron->phoneNumbers->phoneNumber = $phone;
+    }
+    if ($mail != "") {
+      $create_request->patron->emailAddresses = new FBS\Model\EmailAddresses();
+      $create_request->patron->emailAddresses->receiveNotification = TRUE;
+      $create_request->patron->emailAddresses->emailAddress = $mail;
     }
 
     fbs_service()->Patron->create(fbs_service()->agencyId, $create_request);
