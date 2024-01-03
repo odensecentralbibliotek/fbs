@@ -358,16 +358,20 @@ function fbs_profile2_presave($entity)
     $patron_settings = new FBS\Model\PatronSettings();
 
     // Phone
-    $phone = new FBS\Model\PhoneNumber();
-    $phone->phoneNumber = $current['phoneNumber'];
-    $phone->receiveNotification = $current['receiveSms'];
-    $patron_settings->phoneNumbers[0] = $phone;
+    if (isset($current['phoneNumber']) && $current['phoneNumber'] != "") {
+      $phone = new FBS\Model\PhoneNumber();
+      $phone->phoneNumber = $current['phoneNumber'];
+      $phone->receiveNotification = $current['receiveSms'];
+      $patron_settings->phoneNumbers[0] = $phone;
+    }
 
     // E-mail
-    $email = new FBS\Model\EmailAddresses();
-    $email->emailAddress = $current['emailAddress'];
-    $email->receiveNotification = $current['receiveEmail'];
-    $patron_settings->emailAddresses[0] = $email;
+    if (isset($current['emailAddress']) && $current['emailAddress'] != "") {
+      $email = new FBS\Model\EmailAddresses();
+      $email->emailAddress = $current['emailAddress'];
+      $email->receiveNotification = $current['receiveEmail'];
+      $patron_settings->emailAddresses[0] = $email;
+    }
 
     // PickUp
     $patron_settings->preferredPickupBranch = $current['preferredPickupBranch'];
