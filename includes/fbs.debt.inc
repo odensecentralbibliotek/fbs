@@ -56,11 +56,12 @@ function fbs_debt_list($account, $reset = FALSE, $patron_id = NULL, $include_pai
       if ($ids) {
         //OC changes not needed - $ids = ding_provider_build_entity_id($ids);
         $entities = array();
-        // Since ding_entitye_load_multiple() returns array keyed by local tid, we
-        // make e new array keyed by data well PiD.
-        foreach (ding_entity_load_multiple(array_filter($ids)) as $key => $entity) {
-          $entity_id = explode(':', $entity->ding_entity_id);
-          $entities[$entity_id[1]] = $entity;
+        // Skrevet om til at bruge FBI API
+        module_load_include('inc', 'fbi', 'client/fbi.client');
+        foreach ($ids as $faust) {
+          $client = new fbiClient(variable_get('fbi_profile_local_holding', 'opac'));
+          $fbi_results = $client->getManifestationByFaust($faust);
+          $entities[$faust] = $fbi_results;
         }
       }
 
@@ -81,6 +82,7 @@ function fbs_debt_list($account, $reset = FALSE, $patron_id = NULL, $include_pai
           'paid_date' => $fee->paidDate,
           'type' => fbs_debt_translate_debt_type($fee->type),
           'payable' => $fee->payableByClient,
+          'status' => NULL
         );
 
         // If the has associated materials; collect some information about them and
@@ -90,11 +92,13 @@ function fbs_debt_list($account, $reset = FALSE, $patron_id = NULL, $include_pai
           $ding_entity_id = $ids[$material->recordId];
           if (isset($entities[$ding_entity_id])) {
             $entity = $entities[$ding_entity_id];
-            // Create title that links to the object.
-            $uri = entity_uri('ting_object', $entity);
-
+            // Skrevet om til at bruge FBI API
+            $uri = [
+              "path" => "/ting/object/" . $entity->data->manifestation->pid,
+              "options" => [],
+            ];
             $title = t('@material_title (@material_number)', array(
-              '@material_title' => $entity->getTitle(),
+              '@material_title' => $entity->data->manifestation->titles->main[0],
               '@material_number' => $material->materialItemNumber,
             ));
             $materials[] = l($title, $uri['path'], $uri['options']);
@@ -109,16 +113,10 @@ function fbs_debt_list($account, $reset = FALSE, $patron_id = NULL, $include_pai
         }
 
         if (!empty($materials)) {
-          // Apply som inline span-elements, so the different materials in the
-          // display_name can be easily styled.
+          // Skrevet om til at bruge FBI API
           $data['display_name'] = '<span>' . implode('</span><span>', $materials) . '</span>';
-
-          if (count($materials) == 1) {
-            $data['material_type'] = !empty($entity) ? $entity->type : t('Unknown type');
-          }
-          else {
-            $data['material_type'] = t('Multiple materials');
-          }
+          $data['material_type'] = t('Multiple materials');
+          $data['material_type'] = $entity->data->manifestation->materialTypes[0]->materialTypeSpecific->display;
         }
 
         $results[$id] = new DingProviderDebt($id, $data);
@@ -185,7 +183,8 @@ function fbs_debt_payment_received($account, $debt_ids = array(), $order_id = NU
   }
   if (cache_get(session_name() . '-' . $account->uid, 'cache_ding_user_credentials')) {
     $patron_id = is_null($patron_id) ? fbs_patron_id($account) : $patron_id;
-  } else {
+  }
+  else {
     $roles = array_values($GLOBALS['user']->roles);
     // Log out user who are authenticated but has no other roles (i.e. ding user)
     if (user_is_logged_in() && sizeof($roles) == 1 && $roles[0] == 'authenticated user') {
